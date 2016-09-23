@@ -139,7 +139,6 @@ public class Controller implements ActionListener,ChangeListener,BasicPlayerList
 	    } 
 	    catch (BasicPlayerException e1) 
 	    {
-	    	// TODO Auto-generated catch block
 		    e1.printStackTrace();
 		}
 	}
@@ -547,7 +546,6 @@ public class Controller implements ActionListener,ChangeListener,BasicPlayerList
 		} 
         catch (BasicPlayerException e1) 
         {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
         this.view.getNameSongs().setText(this.listmusic.getFileSong().get(file).getSelectedSong().getName());
@@ -595,7 +593,6 @@ public class Controller implements ActionListener,ChangeListener,BasicPlayerList
 	    } 
 	    catch (BasicPlayerException e1) 
 	    {
-		    // TODO Auto-generated catch block
 		    e1.printStackTrace();
 	    }	
 	}
@@ -612,7 +609,6 @@ public class Controller implements ActionListener,ChangeListener,BasicPlayerList
 		try {
 			mp3file = new Mp3File(this.listmusic.getFileSong().get(listmusic.getK()).getSelectedSong().getAbsolutePath());
 		} catch (UnsupportedTagException | InvalidDataException | IOException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		
@@ -623,18 +619,17 @@ public class Controller implements ActionListener,ChangeListener,BasicPlayerList
 			byte[] albumImageData = id3v2Tag.getAlbumImage();
 			if (albumImageData != null) 
 			{
-				File newFile= new File("src/temp.jpg");
+				//TODO Fix a issue with Denied access exception by administrator permission
+				File newFile= new File("/temp.jpg");
 				BufferedImage imag = null;
 				try {
 					imag = ImageIO.read(new ByteArrayInputStream(albumImageData));
 				} catch (IOException e1) {
-					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
 				try {
 					ImageIO.write(imag, "jpg", newFile);
 				} catch (IOException e1) {
-					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
 				
@@ -646,19 +641,16 @@ public class Controller implements ActionListener,ChangeListener,BasicPlayerList
 				try {
 					file = new RandomAccessFile("album-artwork.jpg", "rw");
 				} catch (FileNotFoundException e1) {
-					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
 				try {
 					file.write(albumImageData);
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				try {
 					file.close();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} */
 				

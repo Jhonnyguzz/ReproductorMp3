@@ -21,12 +21,12 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableModel;
 
-import com.melloware.jintellitype.JIntellitype;
 import com.mpatric.mp3agic.ID3v2;
 import com.mpatric.mp3agic.InvalidDataException;
 import com.mpatric.mp3agic.Mp3File;
 import com.mpatric.mp3agic.UnsupportedTagException;
 
+import com.melloware.jintellitype.JIntellitype;
 import com.melloware.jintellitype.HotkeyListener;
 import com.melloware.jintellitype.IntellitypeListener;
 
@@ -723,7 +723,8 @@ public class ControllerForWindows implements ActionListener,ChangeListener,Basic
 			byte[] albumImageData = id3v2Tag.getAlbumImage();
 			if (albumImageData != null) 
 			{
-				File newFile= new File("src/temp.jpg");
+				//TODO Fix a issue with Denied access exception by administrator permission
+				File newFile= new File("/temp.jpg");
 				BufferedImage imag = null;
 				try {
 					imag = ImageIO.read(new ByteArrayInputStream(albumImageData));
