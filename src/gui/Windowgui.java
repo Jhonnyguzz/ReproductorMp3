@@ -70,7 +70,7 @@ public class Windowgui extends JFrame
 		setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/logoun.png")));
 		this.setTitle("Reproductor MP3");
 		this.setResizable(false);        
-		this.setBounds(350,150,665,536); 
+		this.setBounds(350,150,747,511); 
 		this.setLocationRelativeTo(null);
 		getContentPane().setLayout(null);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); 
@@ -81,78 +81,77 @@ public class Windowgui extends JFrame
 		contentPane.setLayout(null);
 		
 		btnPlay = new JButton(">");
-		btnPlay.setBounds(178, 390, 52, 23);
+		btnPlay.setBounds(95, 435, 52, 23);
 		btnPlay.setOpaque(false);
 		contentPane.add(btnPlay);
 
 		btnStop = new JButton("\u25A0");
-		btnStop.setBounds(238, 390, 46, 23);
+		btnStop.setBounds(157, 435, 46, 23);
 		btnStop.setOpaque(false);
 		contentPane.add(btnStop);
 		
 		sliderRep = new JSlider();
 		sliderRep.setValue(0);
 		sliderRep.setOpaque(false);
-		sliderRep.setBounds(33, 356, 386, 23);
+		sliderRep.setBounds(33, 401, 386, 23);
 		contentPane.add(sliderRep);
 		
 		sliderVol = new JSlider();
-		sliderVol.setOrientation(SwingConstants.VERTICAL);
 		sliderVol.setValue(100);
-		sliderVol.setBounds(530, 269, 52, 101);
+		sliderVol.setBounds(317, 435, 102, 26);
 		sliderVol.setOpaque(false);
 		contentPane.add(sliderVol);
 		
 		lblVol = new JLabel("100%");
-		lblVol.setBounds(488, 269, 40, 14);
+		lblVol.setBounds(429, 439, 40, 14);
 		contentPane.add(lblVol);
 		
 		btnPrev = new JButton("<<");
-		btnPrev.setBounds(92, 390, 52, 23);
+		btnPrev.setBounds(33, 435, 52, 23);
 		btnPrev.setOpaque(false);
 		contentPane.add(btnPrev);
 		
 		btnNext = new JButton(">>");
-		btnNext.setBounds(317, 390, 52, 23);
+		btnNext.setBounds(213, 435, 52, 23);
 		btnNext.setOpaque(false);
 		contentPane.add(btnNext);
 		
 		tableListSong = new JTable(new DefaultTableModel(null, new String[]{"Lista de Reproducci\u00F3n"}));
 		scroll = new JScrollPane(tableListSong);
-		scroll.setBounds(33, 44, 445, 267);
+		scroll.setBounds(520, 44, 204, 312);
 		contentPane.add(scroll);
 
 		rdbtnLoopList = new JRadioButton("Repetir lista");
 		buttonGroup.add(rdbtnLoopList);
-		rdbtnLoopList.setBounds(488, 77, 109, 23);
+		rdbtnLoopList.setBounds(615, 401, 109, 23);
 		rdbtnLoopList.setOpaque(false);
 		contentPane.add(rdbtnLoopList);
 		
 		rdbtnLoopSong = new JRadioButton("Repetir canci\u00F3n");
 		buttonGroup.add(rdbtnLoopSong);
-		rdbtnLoopSong.setBounds(488, 109, 138, 23);
+		rdbtnLoopSong.setBounds(616, 375, 138, 23);
 		rdbtnLoopSong.setOpaque(false);
 		contentPane.add(rdbtnLoopSong);
 		
 		rdbtnNormal = new JRadioButton("Normal");
 		rdbtnNormal.setSelected(true);
 		buttonGroup.add(rdbtnNormal);
-		rdbtnNormal.setBounds(488, 47, 94, 23);
+		rdbtnNormal.setBounds(520, 375, 94, 23);
 		rdbtnNormal.setOpaque(false);
 		contentPane.add(rdbtnNormal);
 		
 		rdbtnRandom = new JRadioButton("Aleatorio");
 		buttonGroup.add(rdbtnRandom);
-		rdbtnRandom.setBounds(488, 140, 109, 23);
+		rdbtnRandom.setBounds(520, 401, 109, 23);
 		rdbtnRandom.setOpaque(false);
 		contentPane.add(rdbtnRandom);
 		
 		lblTime = new JLabel("0:00");
-		lblTime.setBounds(432, 356, 46, 14);
+		lblTime.setBounds(429, 401, 46, 14);
 		contentPane.add(lblTime);
 		
 		menuBar = new JMenuBar();
-		menuBar.setBounds(0, 0, 765, 21);
+		menuBar.setBounds(0, 0, 1006, 21);
 		contentPane.add(menuBar);
 		
 		mnFile = new JMenu("Archivo");
@@ -195,21 +194,21 @@ public class Windowgui extends JFrame
 		mnHelp.add(mntmAbout);
 		
 		nameSongs = new JLabel("Bienvenido");
-		nameSongs.setBounds(33, 322, 445, 23);
+		nameSongs.setBounds(33, 367, 445, 23);
 		contentPane.add(nameSongs);
 		
 		btnDel = new JButton("Del");
-		btnDel.setBounds(488, 235, 66, 23);
+		btnDel.setBounds(624, 435, 66, 23);
 		btnDel.setOpaque(false);
 		contentPane.add(btnDel);
 		
 		btnInfo = new JButton("Info");
-		btnInfo.setBounds(488, 201, 66, 23);
+		btnInfo.setBounds(520, 435, 66, 23);
 		btnInfo.setOpaque(false);
 		contentPane.add(btnInfo);
 		
 		btnImgSong = new JLabel("");
-		btnImgSong.setBounds(488, 367, 161, 129);
+		btnImgSong.setBounds(33, 44, 445, 312);
 		btnImgSong.setIcon(new ImageIcon(fondo.getImage().getScaledInstance(btnImgSong.getWidth(), btnImgSong.getHeight(), Image.SCALE_DEFAULT)));
 		contentPane.add(btnImgSong);
 	}

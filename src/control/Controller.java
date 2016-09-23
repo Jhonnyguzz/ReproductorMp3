@@ -620,7 +620,7 @@ public class Controller implements ActionListener,ChangeListener,BasicPlayerList
 			if (albumImageData != null) 
 			{
 				//TODO Fix a issue with Denied access exception by administrator permission
-				File newFile= new File("/temp.jpg");
+				File newFile= new File("temp.jpg");
 				BufferedImage imag = null;
 				try {
 					imag = ImageIO.read(new ByteArrayInputStream(albumImageData));
