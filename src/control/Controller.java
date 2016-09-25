@@ -26,6 +26,10 @@ import com.mpatric.mp3agic.InvalidDataException;
 import com.mpatric.mp3agic.Mp3File;
 import com.mpatric.mp3agic.UnsupportedTagException;
 
+import com.melloware.jintellitype.JIntellitype;
+import com.melloware.jintellitype.HotkeyListener;
+import com.melloware.jintellitype.IntellitypeListener;
+
 import entities.Playlist;
 import gui.Choose;
 import gui.Windowgui;
@@ -83,6 +87,7 @@ public class Controller implements ActionListener,ChangeListener,BasicPlayerList
 		this.view.getTableListSong().addMouseListener(this);
 		
 		this.listmusic.getPlayer().addBasicPlayerListener(this);
+		
 	}
 	/**
 	 * This method is called when you need refresh JTable
@@ -154,85 +159,19 @@ public class Controller implements ActionListener,ChangeListener,BasicPlayerList
 		
 		if(pushBotton==view.getBtnPlay())
 		{
-		    switch(this.view.getBtnPlay().getText()) 
-		    {
-	            case ">":
-	                if(this.listmusic.getRunning()) 
-	                {
-	                	listmusic.Continue();
-	                	this.view.getBtnPlay().setText("||");
-	                }
-	                if(this.listmusic.getRunning()==false) 
-	                {
-	                	listmusic.Play();
-	                    this.view.getBtnPlay().setText("||");
-	                    this.listmusic.setRunning(true);
-	                }
-	            break;
-	            
-	            case "||":
-	                    listmusic.Pause();
-	                    this.view.getBtnPlay().setText(">");
-	            break;
-	        } 	
+		    this.playOrPause();	
 		}
 		if(pushBotton==view.getBtnStop())
 		{
-			listmusic.Stop();
-			this.view.getBtnPlay().setText(">");
-			this.listmusic.setRunning(false);
+			this.stopAllSong();
 		}
 		if(pushBotton==view.getBtnPrev())
 		{
-			if(this.listmusic.getOption()==3)
-			{
-				int max=this.listmusic.getFileSong().size()-1;
-				this.listmusic.setK(this.getRandomNumber(0, max));
-
-				
-				this.listmusic.Stop();
-				this.listmusic.putInMemory(this.listmusic.getK());
-			    this.view.getNameSongs().setText(this.listmusic.getFileSong().get(listmusic.getK()).getSelectedSong().getName());
-				this.listmusic.Play();
-				this.view.getBtnPlay().setText("||");
-				this.listmusic.setRunning(true);
-				this.principalVolume();				
-			}
-			else
-			{
-				listmusic.prevSong();
-				view.getNameSongs().setText(listmusic.getFileSong().get(listmusic.getK()).getSelectedSong().getName());
-				listmusic.Play();
-				this.view.getBtnPlay().setText("||");
-				this.listmusic.setRunning(true);
-				this.principalVolume();
-			}
+			this.thePrevSong();
 		}
 		if(pushBotton==view.getBtnNext())
 		{
-			if(this.listmusic.getOption()==3)
-			{
-				int max=this.listmusic.getFileSong().size()-1;
-				this.listmusic.setK(this.getRandomNumber(0, max));
-
-				
-				this.listmusic.Stop();
-				this.listmusic.putInMemory(this.listmusic.getK());
-			    this.view.getNameSongs().setText(this.listmusic.getFileSong().get(listmusic.getK()).getSelectedSong().getName());
-				this.listmusic.Play();
-				this.view.getBtnPlay().setText("||");
-				this.listmusic.setRunning(true);
-				this.principalVolume();
-			}
-			else
-			{
-				listmusic.nextSong();
-				view.getNameSongs().setText(listmusic.getFileSong().get(listmusic.getK()).getSelectedSong().getName());
-				listmusic.Play();
-				this.view.getBtnPlay().setText("||");
-				this.listmusic.setRunning(true);
-				this.principalVolume();
-			}
+			this.theNextSong();
 		}
 		if(pushBotton==view.getMntmOpen())
 		{
@@ -538,21 +477,24 @@ public class Controller implements ActionListener,ChangeListener,BasicPlayerList
 	@Override
 	public void mouseClicked(MouseEvent e) 
 	{   
-        int file=this.view.getTableListSong().getSelectedRow();
-        this.listmusic.setK(file);
-        try 
-        {
-			this.listmusic.getPlayer().open(this.listmusic.getFileSong().get(file).getSelectedSong());
-		} 
-        catch (BasicPlayerException e1) 
-        {
-			e1.printStackTrace();
-		}
-        this.view.getNameSongs().setText(this.listmusic.getFileSong().get(file).getSelectedSong().getName());
-        this.listmusic.Play();
-        this.view.getBtnPlay().setText("||");
-        this.listmusic.setRunning(true);
-        this.principalVolume();
+		if(e.getClickCount()==2)
+		{
+	        int file=this.view.getTableListSong().getSelectedRow();
+	        this.listmusic.setK(file);
+	        try 
+	        {
+				this.listmusic.getPlayer().open(this.listmusic.getFileSong().get(file).getSelectedSong());
+			} 
+	        catch (BasicPlayerException e1) 
+	        {
+				e1.printStackTrace();
+			}
+	        this.view.getNameSongs().setText(this.listmusic.getFileSong().get(file).getSelectedSong().getName());
+	        this.listmusic.Play();
+	        this.view.getBtnPlay().setText("||");
+	        this.listmusic.setRunning(true);
+	        this.principalVolume();
+	    }
 	}
 	/**
 	 * Override method for implement MouseListener interface,
@@ -602,6 +544,92 @@ public class Controller implements ActionListener,ChangeListener,BasicPlayerList
 	 */
 	@Override
 	public void mouseMoved(MouseEvent arg0){}
+	
+	public void theNextSong()
+	{
+		if(this.listmusic.getOption()==3)
+		{
+			int max=this.listmusic.getFileSong().size()-1;
+			this.listmusic.setK(this.getRandomNumber(0, max));
+
+			
+			this.listmusic.Stop();
+			this.listmusic.putInMemory(this.listmusic.getK());
+		    this.view.getNameSongs().setText(this.listmusic.getFileSong().get(listmusic.getK()).getSelectedSong().getName());
+			this.listmusic.Play();
+			this.view.getBtnPlay().setText("||");
+			this.listmusic.setRunning(true);
+			this.principalVolume();
+		}
+		else
+		{
+			listmusic.nextSong();
+			view.getNameSongs().setText(listmusic.getFileSong().get(listmusic.getK()).getSelectedSong().getName());
+			listmusic.Play();
+			this.view.getBtnPlay().setText("||");
+			this.listmusic.setRunning(true);
+			this.principalVolume();
+		}
+	}
+	
+	public void thePrevSong() 
+	{
+		if(this.listmusic.getOption()==3)
+		{
+			int max=this.listmusic.getFileSong().size()-1;
+			this.listmusic.setK(this.getRandomNumber(0, max));
+
+			
+			this.listmusic.Stop();
+			this.listmusic.putInMemory(this.listmusic.getK());
+		    this.view.getNameSongs().setText(this.listmusic.getFileSong().get(listmusic.getK()).getSelectedSong().getName());
+			this.listmusic.Play();
+			this.view.getBtnPlay().setText("||");
+			this.listmusic.setRunning(true);
+			this.principalVolume();				
+		}
+		else
+		{
+			listmusic.prevSong();
+			view.getNameSongs().setText(listmusic.getFileSong().get(listmusic.getK()).getSelectedSong().getName());
+			listmusic.Play();
+			this.view.getBtnPlay().setText("||");
+			this.listmusic.setRunning(true);
+			this.principalVolume();
+		}
+	}
+	
+	public void playOrPause() 
+	{
+		switch(this.view.getBtnPlay().getText()) 
+	    {
+            case ">":
+                if(this.listmusic.getRunning()) 
+                {
+                	listmusic.Continue();
+                	this.view.getBtnPlay().setText("||");
+                }
+                if(this.listmusic.getRunning()==false) 
+                {
+                	listmusic.Play();
+                    this.view.getBtnPlay().setText("||");
+                    this.listmusic.setRunning(true);
+                }
+            break;
+            
+            case "||":
+                    listmusic.Pause();
+                    this.view.getBtnPlay().setText(">");
+            break;
+        }
+	}
+	
+	public void stopAllSong() 
+	{
+		listmusic.Stop();
+		this.view.getBtnPlay().setText(">");
+		this.listmusic.setRunning(false);
+	}
 	
 	public void loadImgSong()
 	{

@@ -16,9 +16,12 @@ import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.JTable;
-import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.JTabbedPane;
+import javax.swing.event.AncestorListener;
+import javax.swing.event.AncestorEvent;
+import java.awt.CardLayout;
 /**
  * Class that contains GUI
  * @author Jhonatan Guzmán
@@ -26,7 +29,8 @@ import javax.swing.table.DefaultTableModel;
 public class Windowgui extends JFrame
 {
 	private static final long serialVersionUID = 1L;
-	private JPanel contentPane;
+	private JPanel repPane;
+	private JPanel infoPane;
 	private JButton btnPlay;
 	private JButton btnStop;
 	private JButton btnPrev;
@@ -61,6 +65,7 @@ public class Windowgui extends JFrame
 	private ButtonGroup buttonGroup = new ButtonGroup();
 	private JLabel btnImgSong;
 	private ImageIcon fondo = new ImageIcon(getClass().getResource("/note.png"));
+	private JTabbedPane tabbedPane;
 	/**
 	 * Constructs a instance of windowgui, also add properties of 
 	 * a window as title, bounds, JPanel, buttons...
@@ -70,89 +75,20 @@ public class Windowgui extends JFrame
 		setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/logoun.png")));
 		this.setTitle("Reproductor MP3");
 		this.setResizable(false);        
-		this.setBounds(350,150,747,511); 
+		this.setBounds(350,150,724,539); 
 		this.setLocationRelativeTo(null);
-		getContentPane().setLayout(null);
-		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); 
+		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		
+		tabbedPane = new JTabbedPane();
 
-		contentPane = new JPanel();
-		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-		setContentPane(contentPane); 
-		contentPane.setLayout(null);
+		repPane = new JPanel();
+		repPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		
-		btnPlay = new JButton(">");
-		btnPlay.setBounds(95, 435, 52, 23);
-		btnPlay.setOpaque(false);
-		contentPane.add(btnPlay);
-
-		btnStop = new JButton("\u25A0");
-		btnStop.setBounds(157, 435, 46, 23);
-		btnStop.setOpaque(false);
-		contentPane.add(btnStop);
-		
-		sliderRep = new JSlider();
-		sliderRep.setValue(0);
-		sliderRep.setOpaque(false);
-		sliderRep.setBounds(33, 401, 386, 23);
-		contentPane.add(sliderRep);
-		
-		sliderVol = new JSlider();
-		sliderVol.setValue(100);
-		sliderVol.setBounds(317, 435, 102, 26);
-		sliderVol.setOpaque(false);
-		contentPane.add(sliderVol);
-		
-		lblVol = new JLabel("100%");
-		lblVol.setBounds(429, 439, 40, 14);
-		contentPane.add(lblVol);
-		
-		btnPrev = new JButton("<<");
-		btnPrev.setBounds(33, 435, 52, 23);
-		btnPrev.setOpaque(false);
-		contentPane.add(btnPrev);
-		
-		btnNext = new JButton(">>");
-		btnNext.setBounds(213, 435, 52, 23);
-		btnNext.setOpaque(false);
-		contentPane.add(btnNext);
-		
-		tableListSong = new JTable(new DefaultTableModel(null, new String[]{"Lista de Reproducci\u00F3n"}));
-		scroll = new JScrollPane(tableListSong);
-		scroll.setBounds(520, 44, 204, 312);
-		contentPane.add(scroll);
-
-		rdbtnLoopList = new JRadioButton("Repetir lista");
-		buttonGroup.add(rdbtnLoopList);
-		rdbtnLoopList.setBounds(615, 401, 109, 23);
-		rdbtnLoopList.setOpaque(false);
-		contentPane.add(rdbtnLoopList);
-		
-		rdbtnLoopSong = new JRadioButton("Repetir canci\u00F3n");
-		buttonGroup.add(rdbtnLoopSong);
-		rdbtnLoopSong.setBounds(616, 375, 138, 23);
-		rdbtnLoopSong.setOpaque(false);
-		contentPane.add(rdbtnLoopSong);
-		
-		rdbtnNormal = new JRadioButton("Normal");
-		rdbtnNormal.setSelected(true);
-		buttonGroup.add(rdbtnNormal);
-		rdbtnNormal.setBounds(520, 375, 94, 23);
-		rdbtnNormal.setOpaque(false);
-		contentPane.add(rdbtnNormal);
-		
-		rdbtnRandom = new JRadioButton("Aleatorio");
-		buttonGroup.add(rdbtnRandom);
-		rdbtnRandom.setBounds(520, 401, 109, 23);
-		rdbtnRandom.setOpaque(false);
-		contentPane.add(rdbtnRandom);
-		
-		lblTime = new JLabel("0:00");
-		lblTime.setBounds(429, 401, 46, 14);
-		contentPane.add(lblTime);
+		//Menu bar
 		
 		menuBar = new JMenuBar();
-		menuBar.setBounds(0, 0, 1006, 21);
-		contentPane.add(menuBar);
+		menuBar.setBounds(0, 0, 1018, 21);
+		setJMenuBar(menuBar);
 		
 		mnFile = new JMenu("Archivo");
 		menuBar.add(mnFile);
@@ -192,25 +128,108 @@ public class Windowgui extends JFrame
 		
 		mntmAbout = new JMenuItem("Acerca de...");
 		mnHelp.add(mntmAbout);
+		getContentPane().setLayout(new CardLayout(0, 0));
+		repPane.setLayout(null);
+		
+		//Finish menu bar
+		
+		btnPlay = new JButton(">");
+		btnPlay.setBounds(148, 404, 51, 23);
+		btnPlay.setOpaque(false);
+		repPane.add(btnPlay);
+
+		btnStop = new JButton("\u25A0");
+		btnStop.setBounds(209, 404, 51, 23);
+		btnStop.setOpaque(false);
+		repPane.add(btnStop);
+		
+		sliderRep = new JSlider();
+		sliderRep.setValue(0);
+		sliderRep.setOpaque(false);
+		sliderRep.setBounds(10, 367, 397, 26);
+		repPane.add(sliderRep);
+		
+		sliderVol = new JSlider();
+		sliderVol.setValue(100);
+		sliderVol.setBounds(308, 401, 99, 26);
+		sliderVol.setOpaque(false);
+		repPane.add(sliderVol);
+		
+		lblVol = new JLabel("100%");
+		lblVol.setBounds(417, 367, 29, 14);
+		repPane.add(lblVol);
+		
+		btnPrev = new JButton("<<");
+		btnPrev.setBounds(10, 404, 59, 23);
+		btnPrev.setOpaque(false);
+		repPane.add(btnPrev);
+		
+		btnNext = new JButton(">>");
+		btnNext.setBounds(79, 404, 59, 23);
+		btnNext.setOpaque(false);
+		repPane.add(btnNext);
+		
+		tableListSong = new JTable(new DefaultTableModel(null, new String[]{"Lista de Reproducci\u00F3n"}));
+		scroll = new JScrollPane(tableListSong);
+		scroll.setBounds(491, 11, 202, 312);
+		repPane.add(scroll);
+
+		rdbtnLoopList = new JRadioButton("Repetir lista");
+		buttonGroup.add(rdbtnLoopList);
+		rdbtnLoopList.setBounds(576, 343, 117, 23);
+		rdbtnLoopList.setOpaque(false);
+		repPane.add(rdbtnLoopList);
+		
+		rdbtnLoopSong = new JRadioButton("Repetir canci\u00F3n");
+		buttonGroup.add(rdbtnLoopSong);
+		rdbtnLoopSong.setBounds(576, 370, 117, 23);
+		rdbtnLoopSong.setOpaque(false);
+		repPane.add(rdbtnLoopSong);
+		
+		rdbtnNormal = new JRadioButton("Normal");
+		rdbtnNormal.setSelected(true);
+		buttonGroup.add(rdbtnNormal);
+		rdbtnNormal.setBounds(491, 343, 69, 23);
+		rdbtnNormal.setOpaque(false);
+		repPane.add(rdbtnNormal);
+		
+		rdbtnRandom = new JRadioButton("Aleatorio");
+		buttonGroup.add(rdbtnRandom);
+		rdbtnRandom.setBounds(491, 370, 83, 23);
+		rdbtnRandom.setOpaque(false);
+		repPane.add(rdbtnRandom);
+		
+		lblTime = new JLabel("0:00");
+		lblTime.setBounds(420, 408, 22, 14);
+		repPane.add(lblTime);
 		
 		nameSongs = new JLabel("Bienvenido");
-		nameSongs.setBounds(33, 367, 445, 23);
-		contentPane.add(nameSongs);
+		nameSongs.setBounds(10, 334, 436, 14);
+		repPane.add(nameSongs);
 		
 		btnDel = new JButton("Del");
-		btnDel.setBounds(624, 435, 66, 23);
+		btnDel.setBounds(594, 404, 69, 23);
 		btnDel.setOpaque(false);
-		contentPane.add(btnDel);
+		repPane.add(btnDel);
 		
 		btnInfo = new JButton("Info");
-		btnInfo.setBounds(520, 435, 66, 23);
+		btnInfo.setBounds(491, 404, 69, 23);
 		btnInfo.setOpaque(false);
-		contentPane.add(btnInfo);
+		repPane.add(btnInfo);
 		
 		btnImgSong = new JLabel("");
-		btnImgSong.setBounds(33, 44, 445, 312);
+		btnImgSong.setBounds(10, 11, 445, 312);
 		btnImgSong.setIcon(new ImageIcon(fondo.getImage().getScaledInstance(btnImgSong.getWidth(), btnImgSong.getHeight(), Image.SCALE_DEFAULT)));
-		contentPane.add(btnImgSong);
+		repPane.add(btnImgSong);
+		
+		tabbedPane.addTab("Reproducir", repPane);
+		
+		infoPane = new JPanel();
+		infoPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+		
+		tabbedPane.addTab("Detalles", infoPane);
+		
+		getContentPane().add(tabbedPane, "name_430147323327930");
 	}
 	/**
 	 * Getter method of JButton btnPlay

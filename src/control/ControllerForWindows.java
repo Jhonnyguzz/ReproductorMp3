@@ -480,21 +480,24 @@ public class ControllerForWindows implements ActionListener,ChangeListener,Basic
 	@Override
 	public void mouseClicked(MouseEvent e) 
 	{   
-        int file=this.view.getTableListSong().getSelectedRow();
-        this.listmusic.setK(file);
-        try 
-        {
-			this.listmusic.getPlayer().open(this.listmusic.getFileSong().get(file).getSelectedSong());
-		} 
-        catch (BasicPlayerException e1) 
-        {
-			e1.printStackTrace();
-		}
-        this.view.getNameSongs().setText(this.listmusic.getFileSong().get(file).getSelectedSong().getName());
-        this.listmusic.Play();
-        this.view.getBtnPlay().setText("||");
-        this.listmusic.setRunning(true);
-        this.principalVolume();
+		if(e.getClickCount()==2)
+		{
+	        int file=this.view.getTableListSong().getSelectedRow();
+	        this.listmusic.setK(file);
+	        try 
+	        {
+				this.listmusic.getPlayer().open(this.listmusic.getFileSong().get(file).getSelectedSong());
+			} 
+	        catch (BasicPlayerException e1) 
+	        {
+				e1.printStackTrace();
+			}
+	        this.view.getNameSongs().setText(this.listmusic.getFileSong().get(file).getSelectedSong().getName());
+	        this.listmusic.Play();
+	        this.view.getBtnPlay().setText("||");
+	        this.listmusic.setRunning(true);
+	        this.principalVolume();
+	    }
 	}
 	/**
 	 * Override method for implement MouseListener interface,
