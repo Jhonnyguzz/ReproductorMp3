@@ -55,8 +55,8 @@ public class Action
 		} 
         catch (BasicPlayerException e) 
         {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			System.err.println("No se pudo dar play");
 		}
     }
 	/**

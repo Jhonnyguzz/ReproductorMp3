@@ -273,8 +273,8 @@ public class Playlist extends Action implements Serializable
 		} 
     	catch (BasicPlayerException e) 
     	{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			System.err.println("No se pudo poner en memoria");
 		}
     }
     /**
@@ -283,14 +283,15 @@ public class Playlist extends Action implements Serializable
 	 */
 	public void delete(int i)
 	{
+		//TODO Don't stop the song if the delete file is not in open method
 		fileSong.remove(i);
+		k = i;
 		try 
 		{
 			getPlayer().open(this.fileSong.get(i).getSelectedSong());
 		} 
 		catch (BasicPlayerException e) 
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		this.Play();

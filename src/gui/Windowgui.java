@@ -1,5 +1,7 @@
 package gui;  
 
+import java.awt.BorderLayout;
+import java.awt.CardLayout;
 import java.awt.Image;
 import java.awt.Toolkit;
 
@@ -12,16 +14,14 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
+import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.JTabbedPane;
-import javax.swing.event.AncestorListener;
-import javax.swing.event.AncestorEvent;
-import java.awt.CardLayout;
 /**
  * Class that contains GUI
  * @author Jhonatan Guzmán
@@ -61,11 +61,17 @@ public class Windowgui extends JFrame
 	private JMenu mnHelp;
 	private JMenuItem mntmAbout;
 	private JLabel nameSongs;
-	private JButton btnInfo;
+	private JMenuItem btnInfo;
 	private ButtonGroup buttonGroup = new ButtonGroup();
 	private JLabel btnImgSong;
 	private ImageIcon fondo = new ImageIcon(getClass().getResource("/note.png"));
 	private JTabbedPane tabbedPane;
+	private JPopupMenu popmenu;
+	private JMenuItem repPopmenu;
+	private JMenuItem edtPopmenu;
+	private JMenuItem quitPopmenu;
+	private JScrollPane scrollPane;
+	private JTable table;
 	/**
 	 * Constructs a instance of windowgui, also add properties of 
 	 * a window as title, bounds, JPanel, buttons...
@@ -156,7 +162,7 @@ public class Windowgui extends JFrame
 		repPane.add(sliderVol);
 		
 		lblVol = new JLabel("100%");
-		lblVol.setBounds(417, 367, 29, 14);
+		lblVol.setBounds(417, 408, 29, 14);
 		repPane.add(lblVol);
 		
 		btnPrev = new JButton("<<");
@@ -200,7 +206,7 @@ public class Windowgui extends JFrame
 		repPane.add(rdbtnRandom);
 		
 		lblTime = new JLabel("0:00");
-		lblTime.setBounds(420, 408, 22, 14);
+		lblTime.setBounds(417, 367, 22, 14);
 		repPane.add(lblTime);
 		
 		nameSongs = new JLabel("Bienvenido");
@@ -212,20 +218,37 @@ public class Windowgui extends JFrame
 		btnDel.setOpaque(false);
 		repPane.add(btnDel);
 		
-		btnInfo = new JButton("Info");
-		btnInfo.setBounds(491, 404, 69, 23);
-		btnInfo.setOpaque(false);
-		repPane.add(btnInfo);
-		
 		btnImgSong = new JLabel("");
 		btnImgSong.setBounds(10, 11, 445, 312);
 		btnImgSong.setIcon(new ImageIcon(fondo.getImage().getScaledInstance(btnImgSong.getWidth(), btnImgSong.getHeight(), Image.SCALE_DEFAULT)));
 		repPane.add(btnImgSong);
 		
+		popmenu = new JPopupMenu();
+		repPopmenu = new JMenuItem("Reproducir");
+		btnInfo = new JMenuItem("Detalles");
+		edtPopmenu = new JMenuItem("Editar");
+		quitPopmenu = new JMenuItem("Quitar");
+		
+		popmenu.add(repPopmenu);
+		popmenu.add(btnInfo);
+		popmenu.add(edtPopmenu);
+		popmenu.add(quitPopmenu);
+		
 		tabbedPane.addTab("Reproducir", repPane);
 		
 		infoPane = new JPanel();
 		infoPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+		infoPane.setLayout(new BorderLayout(0, 0));
+		
+		table = new JTable(new DefaultTableModel(
+			new Object[][] {
+			},
+			new String[] {
+				"Nombre", "Artista", "\u00C1lbum", "A\u00F1o", "G\u00E9nero"
+			}
+		));
+		scrollPane = new JScrollPane(table);
+		infoPane.add(scrollPane, BorderLayout.CENTER);
 		
 		tabbedPane.addTab("Detalles", infoPane);
 		
@@ -387,7 +410,7 @@ public class Windowgui extends JFrame
 	 * Getter method of JButton btnInfo
 	 * @return btnInfo
 	 */
-	public JButton getBtnInfo() 
+	public JMenuItem getBtnInfo() 
 	{
 		return btnInfo;
 	}
@@ -429,5 +452,20 @@ public class Windowgui extends JFrame
 	}
 	public JLabel getBtnImgSong() {
 		return btnImgSong;
+	}
+	public JPopupMenu getPopmenu() {
+		return popmenu;
+	}
+	public JMenuItem getRepPopmenu() {
+		return repPopmenu;
+	}
+	public JMenuItem getEdtPopmenu() {
+		return edtPopmenu;
+	}
+	public JMenuItem getQuitPopmenu() {
+		return quitPopmenu;
+	}
+	public JTable getTable() {
+		return table;
 	}
 }

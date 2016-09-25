@@ -57,12 +57,15 @@ public class Choose
         {
             File folder = chooseDir.getSelectedFile();
             File []listOfFiles = folder.listFiles();
+            
+            Song tmp;
   
             for(int i=0;i<listOfFiles.length;i++) 
             {
                 if(listOfFiles[i].toString().endsWith(".mp3")) 
                 {
-                	myArr.add(new Song(listOfFiles[i]));
+                	tmp = new Song(listOfFiles[i]);
+                	myArr.add(tmp);
                 }
             }       
         }

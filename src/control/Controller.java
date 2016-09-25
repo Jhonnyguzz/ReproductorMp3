@@ -1,6 +1,7 @@
 package control;
 
 import java.awt.Image;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -17,6 +18,8 @@ import javax.imageio.ImageIO;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
+import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableModel;
@@ -79,15 +82,18 @@ public class Controller implements ActionListener,ChangeListener,BasicPlayerList
 		this.view.getRdbtnLoopList().addActionListener(this);
 		this.view.getRdbtnLoopSong().addActionListener(this);
 		this.view.getRdbtnRandom().addActionListener(this);
+		this.view.getRepPopmenu().addActionListener(this);
+		this.view.getEdtPopmenu().addActionListener(this);
+		this.view.getQuitPopmenu().addActionListener(this);
 		
 		this.view.getSliderVol().addChangeListener(this);	
 		
 		this.view.getSliderRep().addMouseMotionListener(this);
 		
 		this.view.getTableListSong().addMouseListener(this);
+		this.view.getPopmenu().addMouseListener(this);
 		
 		this.listmusic.getPlayer().addBasicPlayerListener(this);
-		
 	}
 	/**
 	 * This method is called when you need refresh JTable
@@ -118,6 +124,33 @@ public class Controller implements ActionListener,ChangeListener,BasicPlayerList
 			rowData[0]=null;
 			rowData[0]=this.listmusic.getFileSong().get(i).getSelectedSong().getName(); 
 			modelTable.addRow(rowData);
+		}
+		
+		String columnas1[] = new String[] {"Nombre", "Artista", "\u00C1lbum", "A\u00F1o", "G\u00E9nero"};
+		Object filas1[][] = new Object[][] {};
+		DefaultTableModel modelTable1 = new DefaultTableModel(filas1,columnas1)
+		{
+			private static final long serialVersionUID = -5989295416281562571L;
+			boolean[] columnEditables = new boolean[] {true,true,true,true,true};
+			@Override
+            public boolean isCellEditable(int row, int column) 
+			{
+				return columnEditables[column];
+			}			
+		};
+		this.view.getTable().setModel(modelTable1);
+
+		Object rowData1[] = new Object[5];
+		
+		for(int i=0;i<this.listmusic.getFileSong().size();i++)
+		{
+			rowData1[0]=this.listmusic.getFileSong().get(i).getTitle();
+			rowData1[1]=this.listmusic.getFileSong().get(i).getAuthor(); 
+			rowData1[2]=this.listmusic.getFileSong().get(i).getAlbum(); 
+			rowData1[3]=this.listmusic.getFileSong().get(i).getYear(); 
+			rowData1[4]=this.listmusic.getFileSong().get(i).getGenre();
+			
+			modelTable1.addRow(rowData1);
 		}
 	}
 	/**
@@ -185,6 +218,7 @@ public class Controller implements ActionListener,ChangeListener,BasicPlayerList
 				this.listmusic.setRunning(true);
 			}
 			this.printTable();
+			this.view.getTableListSong().getSelectionModel().setSelectionInterval(0, 0);
 		}
 		if(pushBotton==view.getMntmOpenDir())
 		{
@@ -204,6 +238,7 @@ public class Controller implements ActionListener,ChangeListener,BasicPlayerList
 				this.listmusic.setRunning(true);
 			}
 			this.printTable();
+			this.view.getTableListSong().getSelectionModel().setSelectionInterval(0, 0);
 		}
 		if(pushBotton==view.getMntmOpenList())
 		{
@@ -223,6 +258,7 @@ public class Controller implements ActionListener,ChangeListener,BasicPlayerList
 				this.listmusic.setRunning(true);
 			}
 			this.printTable();
+			this.view.getTableListSong().getSelectionModel().setSelectionInterval(0, 0);
 		}
 		if(pushBotton==view.getMntmSaveList())
 		{
@@ -255,23 +291,26 @@ public class Controller implements ActionListener,ChangeListener,BasicPlayerList
 		}
 		if(pushBotton==view.getBtnDel())
 		{
+			//TODO Don't stop the song if the delete file is not in open method
+			//it is in delete method from model
 			this.listmusic.delete(this.view.getTableListSong().getSelectedRow());
 			this.view.getNameSongs().setText(this.listmusic.getFileSong().get(listmusic.getK()).getSelectedSong().getName());
 			this.printTable();
+            this.view.getTableListSong().getSelectionModel().setSelectionInterval(listmusic.getK(), listmusic.getK());
 		}
 		if(pushBotton==view.getBtnInfo())
 		{	
 			JOptionPane.showMessageDialog(null, 				
 					"Título: "+
-			        this.listmusic.getFileSong().get(this.listmusic.getK()).getTitle()+"\n"+
+			        this.listmusic.getFileSong().get(this.view.getTableListSong().getSelectedRow()).getTitle()+"\n"+
 					"Autor: "+		
-			        this.listmusic.getFileSong().get(this.listmusic.getK()).getAuthor()+"\n"+
+			        this.listmusic.getFileSong().get(this.view.getTableListSong().getSelectedRow()).getAuthor()+"\n"+
 			        "Álbum: "+
-			        this.listmusic.getFileSong().get(this.listmusic.getK()).getAlbum()+"\n"+
+			        this.listmusic.getFileSong().get(this.view.getTableListSong().getSelectedRow()).getAlbum()+"\n"+
 			        "Duración: "+
-			        this.listmusic.getFileSong().get(this.listmusic.getK()).getTime()+"\n"+
+			        this.listmusic.getFileSong().get(this.view.getTableListSong().getSelectedRow()).getTime()+"\n"+
 			        "Año: "+
-			        this.listmusic.getFileSong().get(this.listmusic.getK()).getYear(), "Información", 1);
+			        this.listmusic.getFileSong().get(this.view.getTableListSong().getSelectedRow()).getYear(), "Información", 1);
 		}
 		if(pushBotton==view.getRdbtnNormal())
 		{
@@ -288,6 +327,18 @@ public class Controller implements ActionListener,ChangeListener,BasicPlayerList
 		if(pushBotton==view.getRdbtnRandom())
 		{
 			this.listmusic.setOption(3);
+		}
+		if(pushBotton==view.getRepPopmenu())
+		{
+			this.playSinceTable();
+		}
+		if(pushBotton==view.getEdtPopmenu())
+		{
+			//TODO
+		}
+		if(pushBotton==view.getQuitPopmenu())
+		{
+			//TODO
 		}
 	}
 	/**
@@ -359,11 +410,12 @@ public class Controller implements ActionListener,ChangeListener,BasicPlayerList
 			year=properties.get("date").toString();
 		}	
 			
-		this.listmusic.getFileSong().get(this.listmusic.getK()).setAlbum(album);
-		this.listmusic.getFileSong().get(this.listmusic.getK()).setTitle(title);
-		this.listmusic.getFileSong().get(this.listmusic.getK()).setAuthor(author);
-		this.listmusic.getFileSong().get(this.listmusic.getK()).setTime(time);
-		this.listmusic.getFileSong().get(this.listmusic.getK()).setYear(year);
+		//TODO in process to delete this listener
+		//this.listmusic.getFileSong().get(this.listmusic.getK()).setAlbum(album);
+		//this.listmusic.getFileSong().get(this.listmusic.getK()).setTitle(title);
+		//this.listmusic.getFileSong().get(this.listmusic.getK()).setAuthor(author);
+		//this.listmusic.getFileSong().get(this.listmusic.getK()).setTime(time);
+		//this.listmusic.getFileSong().get(this.listmusic.getK()).setYear(year);
 		
 		System.out.println("Cargando imagen");
 		loadImgSong();
@@ -424,6 +476,7 @@ public class Controller implements ActionListener,ChangeListener,BasicPlayerList
                 this.view.getBtnPlay().setText("||");
                 this.listmusic.setRunning(true);
                 this.principalVolume();
+                this.view.getTableListSong().getSelectionModel().setSelectionInterval(listmusic.getK(), listmusic.getK());
 			}
 		}
 		if(arg0.getCode()==8 && this.listmusic.getOption()==1)
@@ -435,6 +488,8 @@ public class Controller implements ActionListener,ChangeListener,BasicPlayerList
             this.view.getBtnPlay().setText("||");
             this.listmusic.setRunning(true);
             this.principalVolume();
+            this.view.getTableListSong().getSelectionModel().setSelectionInterval(listmusic.getK(), listmusic.getK());
+            
 		}
 		if(arg0.getCode()==8 && this.listmusic.getOption()==2)
 		{
@@ -459,6 +514,7 @@ public class Controller implements ActionListener,ChangeListener,BasicPlayerList
 			this.view.getBtnPlay().setText("||");
 			this.listmusic.setRunning(true);
 			this.principalVolume();
+			this.view.getTableListSong().getSelectionModel().setSelectionInterval(listmusic.getK(), listmusic.getK());
 		}
 	}
 	/**
@@ -477,24 +533,18 @@ public class Controller implements ActionListener,ChangeListener,BasicPlayerList
 	@Override
 	public void mouseClicked(MouseEvent e) 
 	{   
-		if(e.getClickCount()==2)
+		if(e.getClickCount()==2 && SwingUtilities.isLeftMouseButton(e))
 		{
-	        int file=this.view.getTableListSong().getSelectedRow();
-	        this.listmusic.setK(file);
-	        try 
-	        {
-				this.listmusic.getPlayer().open(this.listmusic.getFileSong().get(file).getSelectedSong());
-			} 
-	        catch (BasicPlayerException e1) 
-	        {
-				e1.printStackTrace();
-			}
-	        this.view.getNameSongs().setText(this.listmusic.getFileSong().get(file).getSelectedSong().getName());
-	        this.listmusic.Play();
-	        this.view.getBtnPlay().setText("||");
-	        this.listmusic.setRunning(true);
-	        this.principalVolume();
-	    }
+	        this.playSinceTable();
+	    }	
+		if(e.getClickCount()==1 && SwingUtilities.isRightMouseButton(e) && e.isPopupTrigger()) 
+		{
+			Point p = e.getPoint();
+            int rowNumber = this.view.getTableListSong().rowAtPoint( p );
+            ListSelectionModel modelo = this.view.getTableListSong().getSelectionModel();
+            modelo.setSelectionInterval( rowNumber, rowNumber );
+			this.view.getPopmenu().show(e.getComponent(), e.getX(), e.getY());
+		}
 	}
 	/**
 	 * Override method for implement MouseListener interface,
@@ -519,7 +569,17 @@ public class Controller implements ActionListener,ChangeListener,BasicPlayerList
 	 * this method is not used
 	 */
 	@Override
-	public void mouseReleased(MouseEvent arg0) {}
+	public void mouseReleased(MouseEvent e) 
+	{
+		if(e.getClickCount()==1 && SwingUtilities.isRightMouseButton(e) && e.isPopupTrigger()) 
+		{
+			Point p = e.getPoint();
+            int rowNumber = this.view.getTableListSong().rowAtPoint( p );
+            ListSelectionModel modelo = this.view.getTableListSong().getSelectionModel();
+            modelo.setSelectionInterval( rowNumber, rowNumber );
+			this.view.getPopmenu().show(e.getComponent(), e.getX(), e.getY());
+		}
+	}
 	/**
 	 * Override method for implement MouseMotionListener interface,
 	 * this method get the movement of JSlider rep to forward or backward
@@ -545,7 +605,7 @@ public class Controller implements ActionListener,ChangeListener,BasicPlayerList
 	@Override
 	public void mouseMoved(MouseEvent arg0){}
 	
-	public void theNextSong()
+	private void theNextSong()
 	{
 		if(this.listmusic.getOption()==3)
 		{
@@ -560,6 +620,7 @@ public class Controller implements ActionListener,ChangeListener,BasicPlayerList
 			this.view.getBtnPlay().setText("||");
 			this.listmusic.setRunning(true);
 			this.principalVolume();
+			this.view.getTableListSong().getSelectionModel().setSelectionInterval(listmusic.getK(), listmusic.getK());
 		}
 		else
 		{
@@ -569,11 +630,13 @@ public class Controller implements ActionListener,ChangeListener,BasicPlayerList
 			this.view.getBtnPlay().setText("||");
 			this.listmusic.setRunning(true);
 			this.principalVolume();
+			this.view.getTableListSong().getSelectionModel().setSelectionInterval(listmusic.getK(), listmusic.getK());
 		}
 	}
 	
-	public void thePrevSong() 
+	private void thePrevSong() 
 	{
+		//Random song if I press prev button
 		if(this.listmusic.getOption()==3)
 		{
 			int max=this.listmusic.getFileSong().size()-1;
@@ -586,7 +649,8 @@ public class Controller implements ActionListener,ChangeListener,BasicPlayerList
 			this.listmusic.Play();
 			this.view.getBtnPlay().setText("||");
 			this.listmusic.setRunning(true);
-			this.principalVolume();				
+			this.principalVolume();	
+			this.view.getTableListSong().getSelectionModel().setSelectionInterval(listmusic.getK(), listmusic.getK());
 		}
 		else
 		{
@@ -596,10 +660,11 @@ public class Controller implements ActionListener,ChangeListener,BasicPlayerList
 			this.view.getBtnPlay().setText("||");
 			this.listmusic.setRunning(true);
 			this.principalVolume();
+			this.view.getTableListSong().getSelectionModel().setSelectionInterval(listmusic.getK(), listmusic.getK());
 		}
 	}
 	
-	public void playOrPause() 
+	private void playOrPause() 
 	{
 		switch(this.view.getBtnPlay().getText()) 
 	    {
@@ -624,11 +689,31 @@ public class Controller implements ActionListener,ChangeListener,BasicPlayerList
         }
 	}
 	
-	public void stopAllSong() 
+	private void stopAllSong() 
 	{
 		listmusic.Stop();
 		this.view.getBtnPlay().setText(">");
 		this.listmusic.setRunning(false);
+	}
+	
+	private void playSinceTable()
+	{
+		int file=this.view.getTableListSong().getSelectedRow();
+        this.listmusic.setK(file);
+        try 
+        {
+			this.listmusic.getPlayer().open(this.listmusic.getFileSong().get(file).getSelectedSong());
+		} 
+        catch (BasicPlayerException e1) 
+        {
+			e1.printStackTrace();
+			System.err.println("Error al intentar reproducir");
+		}
+        this.view.getNameSongs().setText(this.listmusic.getFileSong().get(file).getSelectedSong().getName());
+        this.listmusic.Play();
+        this.view.getBtnPlay().setText("||");
+        this.listmusic.setRunning(true);
+        this.principalVolume();
 	}
 	
 	public void loadImgSong()

@@ -1,7 +1,14 @@
 package entities;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
+
+import com.mpatric.mp3agic.ID3v1;
+import com.mpatric.mp3agic.ID3v2;
+import com.mpatric.mp3agic.InvalidDataException;
+import com.mpatric.mp3agic.Mp3File;
+import com.mpatric.mp3agic.UnsupportedTagException;
 
 /**
 *The class Song has atributes
@@ -19,6 +26,7 @@ public class Song implements Serializable,Comparable<Song>
 	private String time;
 	private String album;
 	private String year;
+	private String genre;
 	/**
 	 * Constructs a new instance
 	 * of Song with File as parameter  
@@ -27,6 +35,52 @@ public class Song implements Serializable,Comparable<Song>
 	public Song(File selectedSong)
 	{
 		this.selectedSong=selectedSong;
+		
+		//TODO Put information about song
+		Mp3File mp3file = null;
+		try {
+			mp3file = new Mp3File(this.selectedSong.getAbsolutePath());
+		} catch (UnsupportedTagException | InvalidDataException | IOException e1) {
+			e1.printStackTrace();
+			System.err.println("Error asignando etiquetas ID3");
+		}
+		
+		long mili = mp3file.getLengthInMilliseconds();
+		
+		long sec = (mili / 1000) % 60;
+	    int min = (int)(mili / 1000) / 60;	
+	    String time = String.valueOf(min)+":"+String.valueOf(sec);
+	    if(sec>=0 && sec<=9)
+	    {
+	    	time = String.valueOf(min)+":"+"0"+String.valueOf(sec);
+	    }
+	    setTime(time);
+		
+		if (mp3file.hasId3v2Tag()) {
+			ID3v2 songTags = mp3file.getId3v2Tag();
+			setAuthor(songTags.getArtist());
+			setTitle(songTags.getTitle());
+			setAlbum(songTags.getAlbum());
+			setYear(songTags.getYear());
+			setGenre(songTags.getGenreDescription());
+		}
+		else if (mp3file.hasId3v1Tag()) 
+		{
+			ID3v1 songTags = mp3file.getId3v1Tag();
+			setAuthor(songTags.getArtist());
+			setTitle(songTags.getTitle());
+			setAlbum(songTags.getAlbum());
+			setYear(songTags.getYear());
+			setGenre(songTags.getGenreDescription());
+		}
+		else
+		{
+			setAuthor("Desconocido");
+			setTitle("Desconocido");
+			setAlbum("Desconocido");
+			setYear("Desconocido");
+			setGenre("Desconocido");
+		}
 	}	
 	/**
 	 * Initialize a new instance
@@ -128,6 +182,12 @@ public class Song implements Serializable,Comparable<Song>
 	public void setYear(String year) 
 	{
 		this.year = year;
+	}
+	public String getGenre() {
+		return genre;
+	}
+	public void setGenre(String genre) {
+		this.genre = genre;
 	}
 	/**
 	 * Override method from Object class
