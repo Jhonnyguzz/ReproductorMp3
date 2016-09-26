@@ -22,6 +22,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.JTextField;
 /**
  * Class that contains GUI
  * @author Jhonatan Guzmán
@@ -72,6 +73,7 @@ public class Windowgui extends JFrame
 	private JMenuItem quitPopmenu;
 	private JScrollPane scrollPane;
 	private JTable table;
+	private JTextField textFieldSearch;
 	/**
 	 * Constructs a instance of windowgui, also add properties of 
 	 * a window as title, bounds, JPanel, buttons...
@@ -177,7 +179,7 @@ public class Windowgui extends JFrame
 		
 		tableListSong = new JTable(new DefaultTableModel(null, new String[]{"Lista de Reproducci\u00F3n"}));
 		scroll = new JScrollPane(tableListSong);
-		scroll.setBounds(491, 11, 202, 312);
+		scroll.setBounds(491, 42, 202, 281);
 		repPane.add(scroll);
 
 		rdbtnLoopList = new JRadioButton("Repetir lista");
@@ -235,6 +237,15 @@ public class Windowgui extends JFrame
 		popmenu.add(quitPopmenu);
 		
 		tabbedPane.addTab("Reproducir", repPane);
+		
+		textFieldSearch = new JTextField();
+		textFieldSearch.setBounds(561, 11, 132, 20);
+		repPane.add(textFieldSearch);
+		textFieldSearch.setColumns(10);
+		
+		JLabel lblBuscar = new JLabel("Buscar");
+		lblBuscar.setBounds(491, 17, 46, 14);
+		repPane.add(lblBuscar);
 		
 		infoPane = new JPanel();
 		infoPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -467,5 +478,8 @@ public class Windowgui extends JFrame
 	}
 	public JTable getTable() {
 		return table;
+	}
+	public JTextField getTextFieldSearch() {
+		return textFieldSearch;
 	}
 }

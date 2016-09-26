@@ -4,6 +4,8 @@ import java.awt.Image;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -19,19 +21,18 @@ import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.ListSelectionModel;
+import javax.swing.RowFilter;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
 
 import com.mpatric.mp3agic.ID3v2;
 import com.mpatric.mp3agic.InvalidDataException;
 import com.mpatric.mp3agic.Mp3File;
 import com.mpatric.mp3agic.UnsupportedTagException;
-
-import com.melloware.jintellitype.JIntellitype;
-import com.melloware.jintellitype.HotkeyListener;
-import com.melloware.jintellitype.IntellitypeListener;
 
 import entities.Playlist;
 import gui.Choose;
@@ -47,7 +48,7 @@ import utilities.OrderList;
  * implements all Listeners that need 
  * @author Jhonatan Guzmán
  */
-public class Controller implements ActionListener,ChangeListener,BasicPlayerListener, MouseListener, MouseMotionListener
+public class Controller implements ActionListener,ChangeListener,BasicPlayerListener, MouseListener, MouseMotionListener, KeyListener
 {
 	private Playlist listmusic = new Playlist();
 	private Windowgui view = new Windowgui();
@@ -92,6 +93,8 @@ public class Controller implements ActionListener,ChangeListener,BasicPlayerList
 		
 		this.view.getTableListSong().addMouseListener(this);
 		this.view.getPopmenu().addMouseListener(this);
+		
+		this.view.getTextFieldSearch().addKeyListener(this);
 		
 		this.listmusic.getPlayer().addBasicPlayerListener(this);
 	}
@@ -605,6 +608,26 @@ public class Controller implements ActionListener,ChangeListener,BasicPlayerList
 	@Override
 	public void mouseMoved(MouseEvent arg0){}
 	
+	@Override
+	public void keyReleased(KeyEvent e) 
+	{
+		String regExp = this.view.getTextFieldSearch().getText();
+		
+		regExp = toRegExpWithLowerAndUpper(regExp);
+		regExp = ".*" + regExp + ".*";
+		
+		TableRowSorter<TableModel> trs2 = new TableRowSorter<>(this.view.getTableListSong().getModel());
+		trs2.setRowFilter(RowFilter.regexFilter(regExp, 0));
+		
+		this.view.getTableListSong().setRowSorter(trs2);
+	}
+	
+	@Override
+	public void keyPressed(KeyEvent e) {}
+	
+	@Override
+	public void keyTyped(KeyEvent e) {}
+	
 	private void theNextSong()
 	{
 		if(this.listmusic.getOption()==3)
@@ -699,7 +722,10 @@ public class Controller implements ActionListener,ChangeListener,BasicPlayerList
 	private void playSinceTable()
 	{
 		int file=this.view.getTableListSong().getSelectedRow();
-        this.listmusic.setK(file);
+		//necessary for filter the table
+		file = this.view.getTableListSong().convertRowIndexToModel(file);
+		this.listmusic.setK(file);
+		
         try 
         {
 			this.listmusic.getPlayer().open(this.listmusic.getFileSong().get(file).getSelectedSong());
@@ -714,6 +740,38 @@ public class Controller implements ActionListener,ChangeListener,BasicPlayerList
         this.view.getBtnPlay().setText("||");
         this.listmusic.setRunning(true);
         this.principalVolume();
+	}
+	
+	private String toRegExpWithLowerAndUpper(String regExp) 
+	{
+		char aux[] = regExp.toCharArray();
+		StringBuilder sb = new StringBuilder();
+		String tmp = "";
+		
+		for (int i = 0; i < regExp.length(); i++) 
+		{
+			tmp = "";
+			if((int)aux[i]>=65 && (int)aux[i]<=90)
+			{
+				tmp = "("+aux[i]+"|"+(char)(aux[i]+32)+")";
+				sb.append(tmp);
+			}
+			else if((int)aux[i]>=97 && (int)aux[i]<=122)
+			{
+				tmp = "("+(char)(aux[i]-32)+"|"+aux[i]+")";
+				sb.append(tmp);
+			}
+			else if(aux[i]=='Ñ' || (int)aux[i]=='ñ')
+			{
+				tmp = "(Ñ|ñ)";
+				sb.append(tmp);
+			}
+			else
+			{
+				sb.append(aux[i]);
+			}
+		}
+		return sb.toString();
 	}
 	
 	public void loadImgSong()

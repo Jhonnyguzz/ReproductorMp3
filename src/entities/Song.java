@@ -35,8 +35,6 @@ public class Song implements Serializable,Comparable<Song>
 	public Song(File selectedSong)
 	{
 		this.selectedSong=selectedSong;
-		
-		//TODO Put information about song
 		Mp3File mp3file = null;
 		try {
 			mp3file = new Mp3File(this.selectedSong.getAbsolutePath());
