@@ -1,5 +1,7 @@
 package control;
 
+import javax.swing.JOptionPane;
+
 import javazoom.jlgui.basicplayer.BasicPlayer;
 import javazoom.jlgui.basicplayer.BasicPlayerException;
 
@@ -57,6 +59,7 @@ public class Action
         {
 			e.printStackTrace();
 			System.err.println("No se pudo dar play");
+			JOptionPane.showMessageDialog(null, "No se pudo reproducir la canción", "Error", JOptionPane.ERROR_MESSAGE);
 		}
     }
 	/**

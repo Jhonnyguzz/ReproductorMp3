@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
 
+import javax.swing.JOptionPane;
+
 import javazoom.jlgui.basicplayer.BasicPlayerException;
 import control.Action;
 /**
@@ -221,7 +223,6 @@ public class Playlist extends Action implements Serializable
 		} 
     	catch (BasicPlayerException e) 
     	{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
     }
@@ -243,7 +244,6 @@ public class Playlist extends Action implements Serializable
 		} 
     	catch (BasicPlayerException e) 
     	{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
     }
@@ -261,8 +261,9 @@ public class Playlist extends Action implements Serializable
 		} 
     	catch (BasicPlayerException e) 
     	{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			System.err.println("No se pudo poner en memoria");
+			JOptionPane.showMessageDialog(null, "No se pudo cargar la canción", "Error", JOptionPane.ERROR_MESSAGE);
 		}
     }
     public void putInMemory(int index)
@@ -275,6 +276,7 @@ public class Playlist extends Action implements Serializable
     	{
 			e.printStackTrace();
 			System.err.println("No se pudo poner en memoria");
+			JOptionPane.showMessageDialog(null, "No se pudo cargar la canción", "Error", JOptionPane.ERROR_MESSAGE);
 		}
     }
     /**
@@ -311,7 +313,6 @@ public class Playlist extends Action implements Serializable
 		} 
 		catch (BasicPlayerException e) 
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		fileSong.clear();

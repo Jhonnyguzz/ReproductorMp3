@@ -544,6 +544,7 @@ public class Controller implements ActionListener,ChangeListener,BasicPlayerList
 		{
 			Point p = e.getPoint();
             int rowNumber = this.view.getTableListSong().rowAtPoint( p );
+            rowNumber = this.view.getTableListSong().convertRowIndexToModel(rowNumber);
             ListSelectionModel modelo = this.view.getTableListSong().getSelectionModel();
             modelo.setSelectionInterval( rowNumber, rowNumber );
 			this.view.getPopmenu().show(e.getComponent(), e.getX(), e.getY());
@@ -578,6 +579,7 @@ public class Controller implements ActionListener,ChangeListener,BasicPlayerList
 		{
 			Point p = e.getPoint();
             int rowNumber = this.view.getTableListSong().rowAtPoint( p );
+            rowNumber = this.view.getTableListSong().convertRowIndexToModel(rowNumber);
             ListSelectionModel modelo = this.view.getTableListSong().getSelectionModel();
             modelo.setSelectionInterval( rowNumber, rowNumber );
 			this.view.getPopmenu().show(e.getComponent(), e.getX(), e.getY());
