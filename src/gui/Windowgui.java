@@ -22,6 +22,8 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
 import javax.swing.JTextField;
 /**
  * Class that contains GUI
@@ -47,6 +49,7 @@ public class Windowgui extends JFrame
 	private JRadioButton rdbtnLoopSong;
 	private JRadioButton rdbtnNormal;
 	private JRadioButton rdbtnRandom;
+	private JRadioButton rdbtnJustOnce;
 	private JMenuBar menuBar;
 	private JMenu mnFile;
 	private JMenuItem mntmOpen;
@@ -178,6 +181,7 @@ public class Windowgui extends JFrame
 		repPane.add(btnNext);
 		
 		tableListSong = new JTable(new DefaultTableModel(null, new String[]{"Lista de Reproducci\u00F3n"}));
+		//tableListSong.setRowSorter(new TableRowSorter<>(tableListSong.getModel()));
 		scroll = new JScrollPane(tableListSong);
 		scroll.setBounds(491, 42, 202, 281);
 		repPane.add(scroll);
@@ -206,6 +210,12 @@ public class Windowgui extends JFrame
 		rdbtnRandom.setBounds(491, 370, 83, 23);
 		rdbtnRandom.setOpaque(false);
 		repPane.add(rdbtnRandom);
+		
+		rdbtnJustOnce = new JRadioButton("Una Vez");
+		buttonGroup.add(rdbtnJustOnce);
+		rdbtnJustOnce.setBounds(491, 404, 83, 23);
+		rdbtnJustOnce.setOpaque(false);
+		repPane.add(rdbtnJustOnce);
 		
 		lblTime = new JLabel("0:00");
 		lblTime.setBounds(417, 367, 22, 14);
@@ -481,5 +491,8 @@ public class Windowgui extends JFrame
 	}
 	public JTextField getTextFieldSearch() {
 		return textFieldSearch;
+	}
+	public JRadioButton getRdbtnJustOnce() {
+		return rdbtnJustOnce;
 	}
 }

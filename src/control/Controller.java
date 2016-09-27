@@ -13,7 +13,6 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.Map;
 
 import javax.imageio.ImageIO;
@@ -29,6 +28,9 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
+import com.melloware.jintellitype.HotkeyListener;
+import com.melloware.jintellitype.IntellitypeListener;
+import com.melloware.jintellitype.JIntellitype;
 import com.mpatric.mp3agic.ID3v2;
 import com.mpatric.mp3agic.InvalidDataException;
 import com.mpatric.mp3agic.Mp3File;
@@ -41,7 +43,6 @@ import javazoom.jlgui.basicplayer.BasicController;
 import javazoom.jlgui.basicplayer.BasicPlayerEvent;
 import javazoom.jlgui.basicplayer.BasicPlayerException;
 import javazoom.jlgui.basicplayer.BasicPlayerListener;
-import utilities.OrderList;
 
 /**
  * This class is the controller of pattern MVC,
@@ -83,6 +84,7 @@ public class Controller implements ActionListener,ChangeListener,BasicPlayerList
 		this.view.getRdbtnLoopList().addActionListener(this);
 		this.view.getRdbtnLoopSong().addActionListener(this);
 		this.view.getRdbtnRandom().addActionListener(this);
+		this.view.getRdbtnJustOnce().addActionListener(this);
 		this.view.getRepPopmenu().addActionListener(this);
 		this.view.getEdtPopmenu().addActionListener(this);
 		this.view.getQuitPopmenu().addActionListener(this);
@@ -119,6 +121,8 @@ public class Controller implements ActionListener,ChangeListener,BasicPlayerList
 		this.view.getTableListSong().setModel(modelTable);
 		this.view.getTableListSong().getColumnModel().getColumn(0).setResizable(false);
 		this.view.getTableListSong().getColumnModel().getColumn(0).setPreferredWidth(227);
+		
+		this.view.getTableListSong().setRowSorter(new TableRowSorter<>(this.view.getTableListSong().getModel()));
 
 		Object rowData[] = new Object[1];
 		
@@ -273,14 +277,16 @@ public class Controller implements ActionListener,ChangeListener,BasicPlayerList
 		}
 		if(pushBotton==view.getMntmOrderAz())
 		{
-			Collections.sort(listmusic.getFileSong());
-			this.printTable();
+			//TODO Deprecated with RowSorter
+			//Collections.sort(listmusic.getFileSong());
+			//this.printTable();
 		}
 		if(pushBotton==view.getMntmOrderZa())
 		{
-			OrderList c = new OrderList();
-			Collections.sort(listmusic.getFileSong(), c);
-			this.printTable();
+			//TODO Deprecated with RowSorter
+			//OrderList c = new OrderList();
+			//Collections.sort(listmusic.getFileSong(), c);
+			//this.printTable();
 		}
 		if(pushBotton==view.getMntmRemoveList())
 		{
@@ -303,18 +309,23 @@ public class Controller implements ActionListener,ChangeListener,BasicPlayerList
 		}
 		if(pushBotton==view.getBtnInfo())
 		{	
+			int file=this.view.getTableListSong().getSelectedRow();
+			//necessary for filter the table
+			file = this.view.getTableListSong().convertRowIndexToModel(file);
+			
 			JOptionPane.showMessageDialog(null, 				
 					"Título: "+
-			        this.listmusic.getFileSong().get(this.view.getTableListSong().getSelectedRow()).getTitle()+"\n"+
+			        this.listmusic.getFileSong().get(file).getTitle()+"\n"+
 					"Autor: "+		
-			        this.listmusic.getFileSong().get(this.view.getTableListSong().getSelectedRow()).getAuthor()+"\n"+
+			        this.listmusic.getFileSong().get(file).getAuthor()+"\n"+
 			        "Álbum: "+
-			        this.listmusic.getFileSong().get(this.view.getTableListSong().getSelectedRow()).getAlbum()+"\n"+
+			        this.listmusic.getFileSong().get(file).getAlbum()+"\n"+
 			        "Duración: "+
-			        this.listmusic.getFileSong().get(this.view.getTableListSong().getSelectedRow()).getTime()+"\n"+
+			        this.listmusic.getFileSong().get(file).getTime()+"\n"+
 			        "Año: "+
-			        this.listmusic.getFileSong().get(this.view.getTableListSong().getSelectedRow()).getYear(), "Información", 1);
+			        this.listmusic.getFileSong().get(file).getYear(), "Información", 1);
 		}
+		
 		if(pushBotton==view.getRdbtnNormal())
 		{
 			this.listmusic.setOption(0);
@@ -331,6 +342,11 @@ public class Controller implements ActionListener,ChangeListener,BasicPlayerList
 		{
 			this.listmusic.setOption(3);
 		}
+		if(pushBotton==view.getRdbtnJustOnce())
+		{
+			this.listmusic.setOption(4);
+		}
+		
 		if(pushBotton==view.getRepPopmenu())
 		{
 			this.playSinceTable();
@@ -519,6 +535,13 @@ public class Controller implements ActionListener,ChangeListener,BasicPlayerList
 			this.principalVolume();
 			this.view.getTableListSong().getSelectionModel().setSelectionInterval(listmusic.getK(), listmusic.getK());
 		}
+		if(arg0.getCode()==8 && this.listmusic.getOption()==4)
+		{
+			this.listmusic.Stop();
+			this.view.getBtnPlay().setText(">");
+			this.listmusic.setRunning(false);
+		    this.principalVolume();
+		}
 	}
 	/**
 	 * Override method for implement BasicPlayerListener interface, 
@@ -544,10 +567,9 @@ public class Controller implements ActionListener,ChangeListener,BasicPlayerList
 		{
 			Point p = e.getPoint();
             int rowNumber = this.view.getTableListSong().rowAtPoint( p );
-            rowNumber = this.view.getTableListSong().convertRowIndexToModel(rowNumber);
             ListSelectionModel modelo = this.view.getTableListSong().getSelectionModel();
             modelo.setSelectionInterval( rowNumber, rowNumber );
-			this.view.getPopmenu().show(e.getComponent(), e.getX(), e.getY());
+            this.view.getPopmenu().show(e.getComponent(), e.getX(), e.getY());
 		}
 	}
 	/**
@@ -579,10 +601,9 @@ public class Controller implements ActionListener,ChangeListener,BasicPlayerList
 		{
 			Point p = e.getPoint();
             int rowNumber = this.view.getTableListSong().rowAtPoint( p );
-            rowNumber = this.view.getTableListSong().convertRowIndexToModel(rowNumber);
             ListSelectionModel modelo = this.view.getTableListSong().getSelectionModel();
             modelo.setSelectionInterval( rowNumber, rowNumber );
-			this.view.getPopmenu().show(e.getComponent(), e.getX(), e.getY());
+            this.view.getPopmenu().show(e.getComponent(), e.getX(), e.getY());
 		}
 	}
 	/**
@@ -617,6 +638,25 @@ public class Controller implements ActionListener,ChangeListener,BasicPlayerList
 		
 		regExp = toRegExpWithLowerAndUpper(regExp);
 		regExp = ".*" + regExp + ".*";
+		//Looking for accent vowels
+		//Cuidado! Se está usando unicode mas no ascii, revisar opciones
+//		char char1[] = new char[10];
+//		char1[0] = 'Á';
+//		char1[1] = 'É';
+//		char1[2] = 'Í';
+//		char1[3] = 'Ó';
+//		char1[4] = 'Ú';
+//		char1[5] = 'á';
+//		char1[6] = 'é';
+//		char1[7] = 'í';
+//		char1[8] = 'ó';
+//		char1[9] = 'ú';
+//		
+//		for (int i = 0; i < char1.length; i++) {
+//			System.out.println((int)char1[i]);
+//		}
+		
+//		System.out.println(regExp);
 		
 		TableRowSorter<TableModel> trs2 = new TableRowSorter<>(this.view.getTableListSong().getModel());
 		trs2.setRowFilter(RowFilter.regexFilter(regExp, 0));
@@ -753,7 +793,32 @@ public class Controller implements ActionListener,ChangeListener,BasicPlayerList
 		for (int i = 0; i < regExp.length(); i++) 
 		{
 			tmp = "";
-			if((int)aux[i]>=65 && (int)aux[i]<=90)
+			if(aux[i]=='A' || aux[i]=='a' || (int)aux[i]==193 || (int)aux[i]==225)
+			{
+				tmp = "("+"A"+"|"+(char)193+"|a"+"|"+(char)225+")";
+				sb.append(tmp);
+			}
+			else if(aux[i]=='E' || aux[i]=='e' || (int)aux[i]==201 || (int)aux[i]==233)
+			{
+				tmp = "("+"E"+"|"+(char)201+"|e"+"|"+(char)233+")";
+				sb.append(tmp);
+			}
+			else if(aux[i]=='I' || aux[i]=='i' || (int)aux[i]==205 || (int)aux[i]==237)
+			{
+				tmp = "("+"I"+"|"+(char)205+"|i"+"|"+(char)237+")";
+				sb.append(tmp);
+			}
+			else if(aux[i]=='O' || aux[i]=='o' || (int)aux[i]==211 || (int)aux[i]==243)
+			{
+				tmp = "("+"O"+"|"+(char)211+"|o"+"|"+(char)243+")";
+				sb.append(tmp);
+			}
+			else if(aux[i]=='U' || aux[i]=='u' || (int)aux[i]==218 || (int)aux[i]==250)
+			{
+				tmp = "("+"U"+"|"+(char)218+"|u"+"|"+(char)250+")";
+				sb.append(tmp);
+			}	
+			else if((int)aux[i]>=65 && (int)aux[i]<=90)
 			{
 				tmp = "("+aux[i]+"|"+(char)(aux[i]+32)+")";
 				sb.append(tmp);
@@ -763,7 +828,7 @@ public class Controller implements ActionListener,ChangeListener,BasicPlayerList
 				tmp = "("+(char)(aux[i]-32)+"|"+aux[i]+")";
 				sb.append(tmp);
 			}
-			else if(aux[i]=='Ñ' || (int)aux[i]=='ñ')
+			else if(aux[i]=='Ñ' || aux[i]=='ñ')
 			{
 				tmp = "(Ñ|ñ)";
 				sb.append(tmp);
@@ -800,12 +865,18 @@ public class Controller implements ActionListener,ChangeListener,BasicPlayerList
 				} catch (IOException e1) {
 					e1.printStackTrace();
 				}
-				try {
-					ImageIO.write(imag, "jpg", newFile);
-				} catch (IOException e1) {
-					e1.printStackTrace();
-				}
 				
+				if(!(imag==null)) {
+					try {
+						ImageIO.write(imag, "jpg", newFile);
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					}
+				}
+				else
+				{
+					System.out.println("Etiqueta encontrada pero sin imagen");
+				}
 				/* A continuación otro método para recuperar la imagen
 				
 				String mimeType = id3v2Tag.getAlbumImageMimeType();

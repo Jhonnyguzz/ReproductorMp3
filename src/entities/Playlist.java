@@ -142,7 +142,7 @@ public class Playlist extends Action implements Serializable
 	}
 	/**
 	 * Setter method of int option
-	 * @param option 0.Normal  1.Loop Playlist  2.Loop Song
+	 * @param option 0.Normal  1.Loop Playlist  2.Loop Song 3.Random 4.Just Once
 	 */
 	public void setOption(int option) 
 	{
