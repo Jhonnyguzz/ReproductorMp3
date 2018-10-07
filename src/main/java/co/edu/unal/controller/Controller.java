@@ -216,8 +216,13 @@ public class Controller implements ActionListener,ChangeListener,BasicPlayerList
 			listmusic.addSongList(Choose.getChoose());
 			if(listmusic.getFileSong().size()==1)
 			{
-				listmusic.putInMemoryFirst();
-				view.getNameSongs().setText(listmusic.getFileSong().get(listmusic.getK()).getSelectedSong().getName());
+				try {
+					listmusic.putInMemoryFirst();
+					view.getNameSongs().setText(listmusic.getFileSong().get(listmusic.getK()).getSelectedSong().getName());
+				}
+				catch(IndexOutOfBoundsException t) {
+					System.err.println("Empty List");
+				}
 				listmusic.Play();
 				this.view.getBtnPlay().setText("||");
 				this.listmusic.setRunning(true);
