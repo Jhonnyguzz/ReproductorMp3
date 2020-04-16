@@ -4,10 +4,10 @@ import java.awt.EventQueue;
 
 import javax.swing.JFrame;
 import javax.swing.UIManager;
+import javax.swing.plaf.nimbus.NimbusLookAndFeel;
 
 import com.melloware.jintellitype.JIntellitype;
-import org.pushingpixels.substance.api.SubstanceLookAndFeel;
-import org.pushingpixels.substance.api.skin.SubstanceMistAquaLookAndFeel;
+import org.pushingpixels.substance.api.skin.*;
 
 import co.edu.unal.controller.Controller;
 import co.edu.unal.controller.ControllerForWindows;
@@ -26,42 +26,41 @@ public class Main
 	 */
 	public static void main(String[] args) 
 	{       
-        EventQueue.invokeLater(new Runnable()
-        {
-        	public void run()
-        	{
-        		try
-        		{
-        			JFrame.setDefaultLookAndFeelDecorated(true);
-        			UIManager.setLookAndFeel(new SubstanceMistAquaLookAndFeel());
-        		}
-        		catch(Exception e)
-        		{
-        			e.printStackTrace();
-        		}
-        		try
-        		{
-        			Windowgui view = new Windowgui();
-        			Playlist listmusic = new Playlist();
-        			/**
-        			 * Only if you have Windows 64bits - check for you OS and JIntellitype.dll (64bits)
-        			 */
-        			if (JIntellitype.isJIntellitypeSupported()) {
-        				System.out.println("Using hotkeys for windows (Only 64bits)");
-        				ControllerForWindows control = new ControllerForWindows(view,listmusic);
-        			}
-        			else
-        			{
-						System.out.println("JIntellitype.dll was not detected on System32 (Only Windows 64bits)");
-        				Controller control = new Controller(view,listmusic);
-        			}
-        			view.setVisible(true);
-        		}
-        		catch(Exception e)
-        		{
-        			e.printStackTrace();
-        		}
-        	}
+        EventQueue.invokeLater(() -> {
+            try
+            {
+                JFrame.setDefaultLookAndFeelDecorated(true); //Decorate also TopBar with Look and Feel
+                UIManager.setLookAndFeel(new SubstanceMistAquaLookAndFeel());
+                //UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName()); //Based on SO
+                //UIManager.setLookAndFeel(new NimbusLookAndFeel());
+                Windowgui view = new Windowgui();
+            }
+            catch(Exception e)
+            {
+                e.printStackTrace();
+            }
+            try
+            {
+                Windowgui view = new Windowgui();
+                Playlist listmusic = new Playlist();
+                /**
+                 * Only if you have Windows 64bits - check for you OS and JIntellitype.dll (64bits)
+                 */
+                if (JIntellitype.isJIntellitypeSupported()) {
+                    System.out.println("Using hotkeys for windows (Only 64bits)");
+                    ControllerForWindows control = new ControllerForWindows(view,listmusic);
+                }
+                else
+                {
+                    System.out.println("JIntellitype.dll was not detected on System32 (Only Windows 64bits)");
+                    Controller control = new Controller(view,listmusic);
+                }
+                view.setVisible(true);
+            }
+            catch(Exception e)
+            {
+                e.printStackTrace();
+            }
         });
 	}
 }
