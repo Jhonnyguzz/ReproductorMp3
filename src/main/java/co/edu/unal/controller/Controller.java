@@ -9,13 +9,9 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
-import javax.imageio.ImageIO;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
@@ -28,7 +24,6 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
-import com.melloware.jintellitype.JIntellitype;
 import com.mpatric.mp3agic.ID3v2;
 import com.mpatric.mp3agic.InvalidDataException;
 import com.mpatric.mp3agic.Mp3File;
@@ -44,7 +39,7 @@ import javazoom.jlgui.basicplayer.BasicPlayerListener;
 
 /**
  * This class is the controller of pattern MVC,
- * implements all Listeners that need 
+ * implements all Listeners that need
  * @author Jhonatan Guzmán
  */
 public class Controller implements ActionListener,ChangeListener,BasicPlayerListener, MouseListener, MouseMotionListener, KeyListener
@@ -232,7 +227,11 @@ public class Controller implements ActionListener,ChangeListener,BasicPlayerList
 		}
 		if(pushButton==view.getMntmOpenDir())
 		{
-			listmusic.addSongDir(Choose.getDir());
+			try {
+				listmusic.addSongDir(Choose.getDir());
+			} catch (IOException ioException) {
+				ioException.printStackTrace();
+			}
 			if(listmusic.getFileSong().size()==listmusic.getTam())
 			{
 				try {

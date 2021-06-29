@@ -238,7 +238,11 @@ public class ControllerForWindows implements ActionListener,ChangeListener,Basic
 		}
 		if(pushButton==view.getMntmOpenDir())
 		{
-			listmusic.addSongDir(Choose.getDir());
+			try {
+				listmusic.addSongDir(Choose.getDir());
+			} catch (IOException ioException) {
+				ioException.printStackTrace();
+			}
 			if(listmusic.getFileSong().size()==listmusic.getTam())
 			{
 				try {

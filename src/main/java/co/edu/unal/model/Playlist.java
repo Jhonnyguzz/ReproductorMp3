@@ -3,6 +3,7 @@ package co.edu.unal.model;
 import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JOptionPane;
 
@@ -217,14 +218,9 @@ public class Playlist extends Action implements Serializable
 	 * a List of Songs
 	 * @param files ArrayList of Song's instances
 	 */
-	public void addSongDir(ArrayList<Song> files)
-	{	
-		tam=0;
-		tam=files.size();
-		for(int i=0;i<files.size();i++)
-		{
-			fileSong.add(files.get(i));
-		}
+	public void addSongDir(List<Song> files)
+	{
+		fileSong.addAll(files);
 	}
 
 	/**

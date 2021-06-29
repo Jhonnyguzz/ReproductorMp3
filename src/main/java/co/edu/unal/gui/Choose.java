@@ -1,14 +1,22 @@
 package co.edu.unal.gui;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
-import javax.swing.JFileChooser;
+import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import co.edu.unal.util.SerializeList;
 import co.edu.unal.model.Playlist;
 import co.edu.unal.model.Song;
+import io.reactivex.rxjava3.core.Observable;
+
 /**
  * This class use JFileChooser for select Files to add a Song class 
  * and ArrayList of PlayList class
@@ -45,31 +53,20 @@ public class Choose
 	 * <strong>Directories only!</strong>
 	 * @return myArr
 	 */
-    public static ArrayList<Song> getDir() 
-    {
-    	ArrayList<Song> myArr = new ArrayList<Song>();
-    	
+    public static List<Song> getDir() throws IOException {
         chooseDir = new JFileChooser();
         chooseDir.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         int a = chooseDir.showOpenDialog(null);
 
         if(a==JFileChooser.APPROVE_OPTION) 
         {
-            File folder = chooseDir.getSelectedFile();
-            File []listOfFiles = folder.listFiles();
-            
-            Song tmp;
-  
-            for(int i=0;i<listOfFiles.length;i++) 
-            {
-                if(listOfFiles[i].toString().endsWith(".mp3")) 
-                {
-                	tmp = new Song(listOfFiles[i]);
-                	myArr.add(tmp);
-                }
-            }       
+            Path folder = chooseDir.getSelectedFile().toPath();
+			return StreamSupport.stream(Observable.fromStream(Files.list(folder).parallel())
+					.filter(path -> path.toString().endsWith(".mp3"))
+					.map(path -> new Song(path.toFile())).blockingIterable().spliterator(), true)
+					.collect(Collectors.toList());
         }
-        return myArr;
+        return new ArrayList<>();
     }
     /**
      * JFileChooser for save a Playlist in disk 
