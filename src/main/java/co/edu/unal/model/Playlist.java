@@ -18,14 +18,14 @@ import co.edu.unal.controller.Action;
 public class Playlist extends Action implements Serializable
 {
 	private static final long serialVersionUID = 1L;
-	private ArrayList<Song> fileSong = new ArrayList<Song>();
-	private int k;
+	private ArrayList<Song> fileSong = new ArrayList<>();
+	private int currentIndexSong;
 	private int tam;
 	private int progressSong;
 	private int option;
-	private boolean running=false;
+	private boolean running = false;
 	private double bytesLength;
-	private double volume=1.0;
+	private double volume = 1.0;
 	
 	/**
 	 * Constructs a new instance of Playlist class
@@ -35,11 +35,11 @@ public class Playlist extends Action implements Serializable
 	public Playlist(ArrayList<Song> fileSong)
 	{
 		super();
-		this.fileSong=fileSong;
+		this.fileSong = fileSong;
 	}
 
 	/**
-	 * Initialize a empty instance of Playlist class
+	 * Initialize an empty instance of Playlist class
 	 */
 	public Playlist(){}
 
@@ -49,7 +49,7 @@ public class Playlist extends Action implements Serializable
 	 */
 	public void setFileSong(ArrayList<Song> fileSong)
 	{
-		this.fileSong=fileSong;
+		this.fileSong = fileSong;
 	}
 
 	/**
@@ -68,7 +68,7 @@ public class Playlist extends Action implements Serializable
 	 */
 	public void setBytesLength(double bytesLength)
 	{
-		this.bytesLength=bytesLength;
+		this.bytesLength = bytesLength;
 	}
 
 	/**
@@ -131,20 +131,20 @@ public class Playlist extends Action implements Serializable
 	 * Getter method of int k
 	 * @return k
 	 */
-	public int getK() 
+	public int getCurrentIndexSong()
 	{
-		return k;
+		return currentIndexSong;
 	}
 
 	/**
 	 * Setter method of int k
 	 * <strong>only use if you want listen 
 	 * a Song in ArrayList with this index!</strong>
-	 * @param k Index of Song to play in ArrayList 
+	 * @param currentIndexSong Index of Song to play in ArrayList
 	 */
-	public void setK(int k) 
+	public void setCurrentIndexSong(int currentIndexSong)
 	{
-		this.k = k;
+		this.currentIndexSong = currentIndexSong;
 	}
 
 	/**
@@ -203,9 +203,9 @@ public class Playlist extends Action implements Serializable
 	}
 
 	/**
-	 * This method add to ArrayList a instance of Song Class, 
+	 * This method add to ArrayList an instance of Song Class,
 	 * to create a List of Songs
-	 * @param fileSelected A instance of Song class
+	 * @param fileSelected An instance of Song class
 	 */
 	public void addSongList(Song fileSelected)
 	{	
@@ -230,14 +230,10 @@ public class Playlist extends Action implements Serializable
 	 */
     public void nextSong()
     {
-    	k=k+1;
-	    if(k>=fileSong.size())
-	    {
-	    	k=0;
-	    }  
+    	currentIndexSong = currentIndexSong +1 >= fileSong.size() ? 0 : currentIndexSong + 1;
     	try 
     	{
-			getPlayer().open(fileSong.get(k).getSelectedSong());
+			getPlayer().open(fileSong.get(currentIndexSong).getSelectedSong());
 		} 
     	catch (BasicPlayerException e) 
     	{
@@ -252,17 +248,11 @@ public class Playlist extends Action implements Serializable
 	 */
     public void prevSong()
     {
-    	k=k-1;
-	    if(k<0)
-	    {
-	    	k=0;
-	    }  
+    	currentIndexSong = Math.max(currentIndexSong - 1, 0);
     	try 
     	{
-			getPlayer().open(fileSong.get(k).getSelectedSong());
-		} 
-    	catch (BasicPlayerException e) 
-    	{
+			getPlayer().open(fileSong.get(currentIndexSong).getSelectedSong());
+		} catch (BasicPlayerException e) {
 			e.printStackTrace();
 		}
     }
@@ -274,13 +264,11 @@ public class Playlist extends Action implements Serializable
 	 */
     public void putInMemoryFirst()
     {
-    	k=0;
+    	currentIndexSong = 0;
 		try 
     	{
-			getPlayer().open(fileSong.get(k).getSelectedSong());
-		}
-    	catch (BasicPlayerException e)
-    	{
+			getPlayer().open(fileSong.get(currentIndexSong).getSelectedSong());
+		} catch (BasicPlayerException e) {
 			e.printStackTrace();
 			System.err.println("No se pudo poner en memoria");
 			JOptionPane.showMessageDialog(null, "No se pudo cargar la canci\u00F3n", "Error", JOptionPane.ERROR_MESSAGE);
@@ -309,7 +297,7 @@ public class Playlist extends Action implements Serializable
 	{
 		//TODO Don't stop the song if the delete file is not in open method
 		fileSong.remove(i);
-		k = i;
+		currentIndexSong = i;
 		try 
 		{
 			getPlayer().open(this.fileSong.get(i).getSelectedSong());
@@ -347,6 +335,6 @@ public class Playlist extends Action implements Serializable
     @Override
     public String toString()
     {
-    	return "Suena: "+ fileSong.get(k).getSelectedSong().getName();
+    	return "Suena: "+ fileSong.get(currentIndexSong).getSelectedSong().getName();
     }
 }

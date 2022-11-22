@@ -2,9 +2,7 @@ package co.edu.unal;
 
 import java.awt.EventQueue;
 
-import javax.swing.JFrame;
-import javax.swing.UIManager;
-import javax.swing.plaf.nimbus.NimbusLookAndFeel;
+import javax.swing.*;
 
 import com.melloware.jintellitype.JIntellitype;
 import org.pushingpixels.substance.api.skin.*;
@@ -33,33 +31,24 @@ public class Main
                 UIManager.setLookAndFeel(new SubstanceMistAquaLookAndFeel());
                 //UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName()); //Based on SO
                 //UIManager.setLookAndFeel(new NimbusLookAndFeel());
+
                 Windowgui view = new Windowgui();
-            }
-            catch(Exception e)
-            {
-                e.printStackTrace();
-            }
-            try
-            {
-                Windowgui view = new Windowgui();
-                Playlist listmusic = new Playlist();
+                Playlist listMusic = new Playlist();
                 /**
                  * Only if you have Windows 64bits - check for you OS and JIntellitype.dll (64bits)
                  */
                 if (JIntellitype.isJIntellitypeSupported()) {
                     System.out.println("Using hotkeys for windows (Only 64bits)");
-                    ControllerForWindows control = new ControllerForWindows(view,listmusic);
+                    new ControllerForWindows(view, listMusic);
                 }
                 else
                 {
                     System.out.println("JIntellitype.dll was not detected on System32 (Only Windows 64bits)");
-                    Controller control = new Controller(view,listmusic);
+                    new Controller(view, listMusic);
                 }
                 view.setVisible(true);
-            }
-            catch(Exception e)
-            {
-                e.printStackTrace();
+            } catch (UnsupportedLookAndFeelException e) {
+                throw new RuntimeException(e);
             }
         });
 	}

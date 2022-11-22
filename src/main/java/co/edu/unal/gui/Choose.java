@@ -6,8 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
+import java.util.stream.Stream;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -15,7 +14,6 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import co.edu.unal.util.SerializeList;
 import co.edu.unal.model.Playlist;
 import co.edu.unal.model.Song;
-import io.reactivex.rxjava3.core.Observable;
 
 /**
  * This class use JFileChooser for select Files to add a Song class 
@@ -61,10 +59,12 @@ public class Choose
         if(a==JFileChooser.APPROVE_OPTION) 
         {
             Path folder = chooseDir.getSelectedFile().toPath();
-			return StreamSupport.stream(Observable.fromStream(Files.list(folder).parallel())
-					.filter(path -> path.toString().endsWith(".mp3"))
-					.map(path -> new Song(path.toFile())).blockingIterable().spliterator(), true)
-					.collect(Collectors.toList());
+			try(Stream<Path> s = Files.list(folder)) {
+				return s.parallel()
+						.filter(path -> path.toString().endsWith(".mp3"))
+						.map(path -> new Song(path.toFile()))
+						.toList();
+			}
         }
         return new ArrayList<>();
     }

@@ -6,8 +6,8 @@ import javazoom.jlgui.basicplayer.BasicPlayer;
 import javazoom.jlgui.basicplayer.BasicPlayerException;
 
 /**
- * This class use a instance of BasicPlayer class
- * for use its methods more easier and add
+ * This class uses an instance of BasicPlayer class
+ * for using its methods easier and add
  * corresponding Exceptions
  * @author Jhonatan Guzmán
  */
@@ -15,7 +15,7 @@ public class Action
 {
 	private BasicPlayer player = new BasicPlayer();
 	/**
-	 * Initialize a instance of Action class with another
+	 * Initialize an instance of Action class with another
 	 * instance of BasicPlayer class
 	 * @param player Instance of BasicPlayer class
 	 */
@@ -24,7 +24,7 @@ public class Action
 		this.player=player;
 	}	
 	/**
-	 * Initialize a empty instance of Action class
+	 * Initialize an empty instance of Action class
 	 */
 	public Action()	{}
 	/**

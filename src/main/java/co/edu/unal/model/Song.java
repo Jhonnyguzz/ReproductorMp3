@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.Serializable;
 
 import com.mpatric.mp3agic.ID3v1;
-import com.mpatric.mp3agic.ID3v2;
 import com.mpatric.mp3agic.InvalidDataException;
 import com.mpatric.mp3agic.Mp3File;
 import com.mpatric.mp3agic.UnsupportedTagException;
@@ -17,7 +16,7 @@ import com.mpatric.mp3agic.UnsupportedTagException;
 *and source file
 @author Jhonatan Guzmán
 */
-public class Song implements Serializable,Comparable<Song>
+public class Song implements Serializable, Comparable<Song>
 {
 	private static final long serialVersionUID = 1L;
 	private File selectedSong;
@@ -35,50 +34,36 @@ public class Song implements Serializable,Comparable<Song>
 	 */
 	public Song(File selectedSong)
 	{
-		this.selectedSong=selectedSong;
-		Mp3File mp3file = null;
+		this.selectedSong = selectedSong;
+		Mp3File mp3file;
+		long mili;
 		try {
-			mp3file = new Mp3File(this.selectedSong.getAbsolutePath());
+			mp3file = new Mp3File(this.selectedSong);
+			mili = mp3file.getLengthInMilliseconds();
+
+			long sec = (mili / 1000) % 60;
+			int min = (int)(mili / 1000) / 60;
+			this.time = sec>=0 && sec<=9 ? min +":"+"0"+ sec : min +":"+ sec;
+
+			ID3v1 songTags = mp3file.hasId3v2Tag()
+					? mp3file.getId3v2Tag()
+					: mp3file.hasId3v1Tag() ? mp3file.getId3v1Tag() : null;
+			if (songTags != null) {
+				setAuthor(songTags.getArtist());
+				setTitle(songTags.getTitle());
+				setAlbum(songTags.getAlbum());
+				setYear(songTags.getYear());
+				setGenre(songTags.getGenreDescription());
+			} else {
+				setAuthor("Desconocido");
+				setTitle("Desconocido");
+				setAlbum("Desconocido");
+				setYear("Desconocido");
+				setGenre("Desconocido");
+			}
 		} catch (UnsupportedTagException | InvalidDataException | IOException e1) {
 			e1.printStackTrace();
 			System.err.println("Error asignando etiquetas ID3");
-		}
-		
-		long mili = mp3file.getLengthInMilliseconds();
-		
-		long sec = (mili / 1000) % 60;
-	    int min = (int)(mili / 1000) / 60;	
-	    String time = String.valueOf(min)+":"+String.valueOf(sec);
-	    if(sec>=0 && sec<=9)
-	    {
-	    	time = String.valueOf(min)+":"+"0"+String.valueOf(sec);
-	    }
-	    setTime(time);
-		
-		if (mp3file.hasId3v2Tag()) {
-			ID3v2 songTags = mp3file.getId3v2Tag();
-			setAuthor(songTags.getArtist());
-			setTitle(songTags.getTitle());
-			setAlbum(songTags.getAlbum());
-			setYear(songTags.getYear());
-			setGenre(songTags.getGenreDescription());
-		}
-		else if (mp3file.hasId3v1Tag()) 
-		{
-			ID3v1 songTags = mp3file.getId3v1Tag();
-			setAuthor(songTags.getArtist());
-			setTitle(songTags.getTitle());
-			setAlbum(songTags.getAlbum());
-			setYear(songTags.getYear());
-			setGenre(songTags.getGenreDescription());
-		}
-		else
-		{
-			setAuthor("Desconocido");
-			setTitle("Desconocido");
-			setAlbum("Desconocido");
-			setYear("Desconocido");
-			setGenre("Desconocido");
 		}
 	}
 
