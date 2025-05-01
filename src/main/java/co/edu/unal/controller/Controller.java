@@ -1,6 +1,8 @@
 package co.edu.unal.controller;
 
 import io.javalin.Javalin;
+import java.awt.Component;
+import java.awt.Cursor;
 import java.awt.Desktop;
 import java.awt.Image;
 import java.awt.Point;
@@ -12,6 +14,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -21,17 +24,19 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.RowFilter;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
@@ -115,6 +120,7 @@ public class Controller implements ActionListener, ChangeListener, BasicPlayerLi
     this.view.getSliderRep().addMouseMotionListener(this);
 
     this.view.getTableListSong().addMouseListener(this);
+    this.view.getSpotifyTable().addMouseListener(this);
     this.view.getPopmenu().addMouseListener(this);
 
     this.view.getTextFieldSearch().addKeyListener(this);
@@ -194,6 +200,7 @@ public class Controller implements ActionListener, ChangeListener, BasicPlayerLi
       }
     };
     this.view.getSpotifyTable().setModel(modelTable);
+    renderingLinks();
 
     for (Entry<String, List<Track>> trackEntry : tracks.entrySet()) {
 
@@ -215,6 +222,26 @@ public class Controller implements ActionListener, ChangeListener, BasicPlayerLi
     }
     view.getLblTotalTracks().setText("Total canciones: " + tracks.values().stream().mapToLong(List::size).sum());
   }
+
+  private void renderingLinks() {
+    this.view.getSpotifyTable().getColumnModel().getColumn(4).setCellRenderer(new DefaultTableCellRenderer() {
+    @Override
+    public Component getTableCellRendererComponent(JTable table, Object value,
+        boolean isSelected, boolean hasFocus, int row, int column) {
+
+      JLabel label = new JLabel("<html><a href=''>" + value + "</a></html>");
+      label.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+      label.setToolTipText("Haz clic para abrir en Spotify");
+
+      if (isSelected) {
+        label.setForeground(table.getSelectionForeground());
+        label.setBackground(table.getSelectionBackground());
+        label.setOpaque(true);
+      }
+
+      return label;
+    }
+  });}
 
   /**
    * This method generate a random integer for select a random song when option random is active
@@ -600,21 +627,40 @@ public class Controller implements ActionListener, ChangeListener, BasicPlayerLi
 
   /**
    * Override method for implement MouseListener interface, when you click in a row of JTable,
-   * select a index and play the song with that index in ArrayList
+   * select an index and play the song with that index in ArrayList
    *
    * @param e MouseEvent
    */
   @Override
   public void mouseClicked(MouseEvent e) {
-    if (e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e)) {
-      this.playFromTable();
-    }
-    if (e.getClickCount() == 1 && SwingUtilities.isRightMouseButton(e) && e.isPopupTrigger()) {
-      Point p = e.getPoint();
-      int rowNumber = this.view.getTableListSong().rowAtPoint(p);
-      ListSelectionModel modelo = this.view.getTableListSong().getSelectionModel();
-      modelo.setSelectionInterval(rowNumber, rowNumber);
-      this.view.getPopmenu().show(e.getComponent(), e.getX(), e.getY());
+
+    Object source = e.getSource();
+
+    if (source == this.view.getTableListSong()) {
+      if (e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e)) {
+        this.playFromTable();
+      }
+      if (e.getClickCount() == 1 && SwingUtilities.isRightMouseButton(e) && e.isPopupTrigger()) {
+        Point p = e.getPoint();
+        int rowNumber = this.view.getTableListSong().rowAtPoint(p);
+        ListSelectionModel modelo = this.view.getTableListSong().getSelectionModel();
+        modelo.setSelectionInterval(rowNumber, rowNumber);
+        this.view.getPopmenu().show(e.getComponent(), e.getX(), e.getY());
+      }
+    } else if (source == this.view.getSpotifyTable()) {
+      int row = view.getSpotifyTable().rowAtPoint(e.getPoint());
+      int col = view.getSpotifyTable().columnAtPoint(e.getPoint());
+
+      if (col == 4 && row != -1) {
+        Object url = view.getSpotifyTable().getValueAt(row, col);
+        if (url != null) {
+          try {
+            Desktop.getDesktop().browse(new URI(url.toString()));
+          } catch (Exception ex) {
+            ex.printStackTrace();
+          }
+        }
+      }
     }
   }
 
