@@ -117,7 +117,7 @@ public class Windowgui extends JFrame {
     mnFile = new JMenu("Archivo");
     jMenuBar.add(mnFile);
 
-    mntmOpen = new JMenuItem("Abrir canci\u00F3n");
+    mntmOpen = new JMenuItem("Abrir canción");
     mnFile.add(mntmOpen);
 
     mntmOpenDir = new JMenuItem("Abrir directorio");
@@ -132,7 +132,7 @@ public class Windowgui extends JFrame {
     mntmExit = new JMenuItem("Salir");
     mnFile.add(mntmExit);
 
-    mnEdit = new JMenu("Edici\u00F3n");
+    mnEdit = new JMenu("Edición");
     jMenuBar.add(mnEdit);
 
     mnOrder = new JMenu("Ordenar");
@@ -162,7 +162,7 @@ public class Windowgui extends JFrame {
     btnPlay.setOpaque(false);
     repPane.add(btnPlay);
 
-    btnStop = new JButton("\u25A0");
+    btnStop = new JButton("■");
     btnStop.setBounds(209, 404, 51, 23);
     btnStop.setOpaque(false);
     repPane.add(btnStop);
@@ -194,8 +194,7 @@ public class Windowgui extends JFrame {
     repPane.add(btnNext);
 
     tableListSong = new JTable(
-        new DefaultTableModel(null, new String[]{"Lista de Reproducci\u00F3n"}));
-    //tableListSong.setRowSorter(new TableRowSorter<>(tableListSong.getModel()));
+        new DefaultTableModel(null, new String[]{"Lista de Reproducción"}));
     scroll = new JScrollPane(tableListSong);
     scroll.setBounds(491, 42, 202, 281);
     repPane.add(scroll);
@@ -206,7 +205,7 @@ public class Windowgui extends JFrame {
     rdbtnLoopList.setOpaque(false);
     repPane.add(rdbtnLoopList);
 
-    rdbtnLoopSong = new JRadioButton("Repetir canci\u00F3n");
+    rdbtnLoopSong = new JRadioButton("Repetir canción");
     buttonGroup.add(rdbtnLoopSong);
     rdbtnLoopSong.setBounds(576, 370, 117, 23);
     rdbtnLoopSong.setOpaque(false);

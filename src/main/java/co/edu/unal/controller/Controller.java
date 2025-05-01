@@ -192,7 +192,7 @@ public class Controller implements ActionListener, ChangeListener, BasicPlayerLi
     Object[][] filas = new Object[][]{};
     DefaultTableModel modelTable = new DefaultTableModel(filas, columnas) {
       private static final long serialVersionUID = -2L;
-      boolean[] columnEditables = new boolean[]{true, true, true, true, true};
+      boolean[] columnEditables = new boolean[]{true, true, true, true, false};
 
       @Override
       public boolean isCellEditable(int row, int column) {
@@ -648,16 +648,18 @@ public class Controller implements ActionListener, ChangeListener, BasicPlayerLi
         this.view.getPopmenu().show(e.getComponent(), e.getX(), e.getY());
       }
     } else if (source == this.view.getSpotifyTable()) {
-      int row = view.getSpotifyTable().rowAtPoint(e.getPoint());
-      int col = view.getSpotifyTable().columnAtPoint(e.getPoint());
+      if (e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e)) {
+        int row = view.getSpotifyTable().rowAtPoint(e.getPoint());
+        int col = view.getSpotifyTable().columnAtPoint(e.getPoint());
 
-      if (col == 4 && row != -1) {
-        Object url = view.getSpotifyTable().getValueAt(row, col);
-        if (url != null) {
-          try {
-            Desktop.getDesktop().browse(new URI(url.toString()));
-          } catch (Exception ex) {
-            ex.printStackTrace();
+        if (col == 4 && row != -1) {
+          Object url = view.getSpotifyTable().getValueAt(row, col);
+          if (url != null) {
+            try {
+              Desktop.getDesktop().browse(new URI(url.toString()));
+            } catch (Exception ex) {
+              ex.printStackTrace();
+            }
           }
         }
       }
