@@ -63,7 +63,11 @@
       <plugin>
         <groupId>org.graalvm.buildtools</groupId>
         <artifactId>native-maven-plugin</artifactId>
+        <version>0.10.6</version>
         <extensions>true</extensions>
+        <configuration>
+          <mainClass>co.edu.unal.Main</mainClass>
+        </configuration>
       </plugin>
 
     </plugins>
