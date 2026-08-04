@@ -1,17 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                             http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>co.edu.unal</groupId>
   <artifactId>reproductor-mp3</artifactId>
   <version>1.4.0</version>
+  <packaging>jar</packaging>
+
+  <properties>
+    <maven.compiler.release>25</maven.compiler.release>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
   <build>
     <plugins>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.14.0</version>
+        <configuration>
+          <release>25</release>
+
+          <annotationProcessorPaths>
+            <path>
+              <groupId>org.projectlombok</groupId>
+              <artifactId>lombok</artifactId>
+              <version>1.18.46</version>
+            </path>
+          </annotationProcessorPaths>
+        </configuration>
+      </plugin>
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
+        <version>3.7.1</version>
         <executions>
           <execution>
             <phase>package</phase>
@@ -21,9 +49,7 @@
             <configuration>
               <archive>
                 <manifest>
-                  <mainClass>
-                    co.edu.unal.Main
-                  </mainClass>
+                  <mainClass>co.edu.unal.Main</mainClass>
                 </manifest>
               </archive>
               <descriptorRefs>
@@ -33,61 +59,61 @@
           </execution>
         </executions>
       </plugin>
+
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-          <source>21</source>
-          <target>21</target>
-        </configuration>
+        <groupId>org.graalvm.buildtools</groupId>
+        <artifactId>native-maven-plugin</artifactId>
+        <extensions>true</extensions>
       </plugin>
+
     </plugins>
   </build>
-  <packaging>jar</packaging>
 
   <dependencies>
+
     <dependency>
       <groupId>com.googlecode.soundlibs</groupId>
       <artifactId>basicplayer</artifactId>
       <version>3.0.0.0</version>
     </dependency>
+
     <dependency>
       <groupId>org.pushing-pixels</groupId>
       <artifactId>radiance-substance</artifactId>
       <version>4.5.0</version>
     </dependency>
+
     <dependency>
       <groupId>com.mpatric</groupId>
       <artifactId>mp3agic</artifactId>
       <version>0.9.1</version>
     </dependency>
+
     <dependency>
       <groupId>com.melloware</groupId>
       <artifactId>jintellitype</artifactId>
       <version>1.4.1</version>
     </dependency>
-    <dependency>
-      <groupId>org.projectlombok</groupId>
-      <artifactId>lombok</artifactId>
-      <version>1.18.32</version>
-      <scope>provided</scope>
-    </dependency>
+
     <dependency>
       <groupId>se.michaelthelin.spotify</groupId>
       <artifactId>spotify-web-api-java</artifactId>
       <version>9.2.0</version>
     </dependency>
+
     <dependency>
       <groupId>io.javalin</groupId>
       <artifactId>javalin</artifactId>
       <version>6.6.0</version>
     </dependency>
+
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
-      <version>1.18.38</version>
+      <version>1.18.46</version>
       <scope>provided</scope>
     </dependency>
+
   </dependencies>
 
 </project>
