@@ -1,11 +1,11 @@
 package co.edu.unal;
 
+import com.formdev.flatlaf.FlatLightLaf;
 import java.awt.EventQueue;
 
 import javax.swing.*;
 
 import com.melloware.jintellitype.JIntellitype;
-import org.pushingpixels.substance.api.skin.*;
 
 import co.edu.unal.controller.Controller;
 import co.edu.unal.controller.ControllerForWindows;
@@ -22,19 +22,28 @@ public class Main {
   /**
    * Principal method for run applet
    *
-   * @param args String array
    */
-  public static void main(String[] args) {
+  static void main() {
     EventQueue.invokeLater(() -> {
       try {
         JFrame.setDefaultLookAndFeelDecorated(true); //Decorate also TopBar with Look and Feel
-        UIManager.setLookAndFeel(new SubstanceMistAquaLookAndFeel());
+
+        //FlatLaf
+        UIManager.setLookAndFeel(new FlatLightLaf());
+        //UIManager.setLookAndFeel(new FlatDarculaLaf());
+        //UIManager.setLookAndFeel(new FlatMacLightLaf());
+        //UIManager.setLookAndFeel(new FlatMacDarkLaf());
+        //UIManager.setLookAndFeel(new FlatDarkLaf());
+        //UIManager.setLookAndFeel(new FlatIntelliJLaf());
+
+        //Substance
+        //UIManager.setLookAndFeel(new SubstanceMistAquaLookAndFeel());
         //UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName()); //Based on SO
         //UIManager.setLookAndFeel(new NimbusLookAndFeel());
 
         Windowgui view = new Windowgui();
         Playlist listMusic = new Playlist();
-        /**
+        /*
          * Only if you have Windows 64bits - check for you OS and JIntellitype.dll (64bits)
          */
         if (JIntellitype.isJIntellitypeSupported()) {

@@ -1,5 +1,9 @@
 package co.edu.unal.controller;
 
+import io.javalin.Javalin;
+import java.awt.Component;
+import java.awt.Cursor;
+import java.awt.Desktop;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
@@ -10,16 +14,29 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.io.IOException;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.RowFilter;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
@@ -36,6 +53,17 @@ import javazoom.jlgui.basicplayer.BasicController;
 import javazoom.jlgui.basicplayer.BasicPlayerEvent;
 import javazoom.jlgui.basicplayer.BasicPlayerException;
 import javazoom.jlgui.basicplayer.BasicPlayerListener;
+import org.apache.hc.core5.http.ParseException;
+import se.michaelthelin.spotify.SpotifyApi;
+import se.michaelthelin.spotify.SpotifyHttpManager;
+import se.michaelthelin.spotify.exceptions.SpotifyWebApiException;
+import se.michaelthelin.spotify.model_objects.credentials.AuthorizationCodeCredentials;
+import se.michaelthelin.spotify.model_objects.specification.ArtistSimplified;
+import se.michaelthelin.spotify.model_objects.specification.Paging;
+import se.michaelthelin.spotify.model_objects.specification.PlaylistSimplified;
+import se.michaelthelin.spotify.model_objects.specification.PlaylistTrack;
+import se.michaelthelin.spotify.model_objects.specification.Track;
+import se.michaelthelin.spotify.requests.authorization.authorization_code.AuthorizationCodeRequest;
 
 /**
  * This class is the controller of pattern MVC, implements all Listeners that need
@@ -47,10 +75,11 @@ public class Controller implements ActionListener, ChangeListener, BasicPlayerLi
 
   private Playlist listMusic;
   private Windowgui view;
+  private SpotifyApi spotifyApi;
 
   /**
-   * Constructs a instance of Controller class with instance of Windowgui and Playlist as parameters
-   * for add Listeners of these
+   * Constructs an instance of Controller class with instance of Windowgui and Playlist as
+   * parameters for add Listeners of these
    *
    * @param view      Instance of Windowgui class
    * @param listMusic Instance of Playlist class
@@ -74,6 +103,9 @@ public class Controller implements ActionListener, ChangeListener, BasicPlayerLi
     this.view.getMntmAbout().addActionListener(this);
     this.view.getBtnDel().addActionListener(this);
     this.view.getBtnInfo().addActionListener(this);
+    this.view.getBtnConnectSpotify().addActionListener(this);
+    this.view.getBtnLoadTracks().addActionListener(this);
+    this.view.getBtnRefreshToken().addActionListener(this);
     this.view.getRdbtnNormal().addActionListener(this);
     this.view.getRdbtnLoopList().addActionListener(this);
     this.view.getRdbtnLoopSong().addActionListener(this);
@@ -88,9 +120,11 @@ public class Controller implements ActionListener, ChangeListener, BasicPlayerLi
     this.view.getSliderRep().addMouseMotionListener(this);
 
     this.view.getTableListSong().addMouseListener(this);
+    this.view.getSpotifyTable().addMouseListener(this);
     this.view.getPopmenu().addMouseListener(this);
 
     this.view.getTextFieldSearch().addKeyListener(this);
+    this.view.getTextFieldSpotify().addKeyListener(this);
 
     this.listMusic.getPlayer().addBasicPlayerListener(this);
   }
@@ -99,8 +133,8 @@ public class Controller implements ActionListener, ChangeListener, BasicPlayerLi
    * This method is called when you need refresh JTable with name of Songs in ArrayList
    */
   public void printTable() {
-    String columnas[] = new String[]{"Lista de Reproducci\u00F3n"};
-    Object filas[][] = new Object[][]{};
+    String[] columnas = new String[]{"Lista de Reproducción"};
+    Object[][] filas = new Object[][]{};
     DefaultTableModel modelTable = new DefaultTableModel(filas, columnas) {
       private static final long serialVersionUID = 1L;
       boolean[] columnEditables = new boolean[]{false};
@@ -117,16 +151,15 @@ public class Controller implements ActionListener, ChangeListener, BasicPlayerLi
     this.view.getTableListSong()
         .setRowSorter(new TableRowSorter<>(this.view.getTableListSong().getModel()));
 
-    Object rowData[] = new Object[1];
+    Object[] rowData = new Object[1];
 
     for (int i = 0; i < this.listMusic.getFileSong().size(); i++) {
-      rowData[0] = null;
       rowData[0] = this.listMusic.getFileSong().get(i).getSelectedSong().getName();
       modelTable.addRow(rowData);
     }
 
-    String columnas1[] = new String[]{"Nombre", "Artista", "\u00C1lbum", "A\u00F1o", "G\u00E9nero"};
-    Object filas1[][] = new Object[][]{};
+    String[] columnas1 = new String[]{"Nombre", "Artista", "Álbum", "Año", "Género"};
+    Object[][] filas1 = new Object[][]{};
     DefaultTableModel modelTable1 = new DefaultTableModel(filas1, columnas1) {
       private static final long serialVersionUID = -5989295416281562571L;
       boolean[] columnEditables = new boolean[]{true, true, true, true, true};
@@ -138,9 +171,8 @@ public class Controller implements ActionListener, ChangeListener, BasicPlayerLi
     };
     this.view.getTable().setModel(modelTable1);
 
-    Object rowData1[] = new Object[5];
-
     for (int i = 0; i < this.listMusic.getFileSong().size(); i++) {
+      Object[] rowData1 = new Object[5];
       rowData1[0] = this.listMusic.getFileSong().get(i).getTitle();
       rowData1[1] = this.listMusic.getFileSong().get(i).getAuthor();
       rowData1[2] = this.listMusic.getFileSong().get(i).getAlbum();
@@ -150,6 +182,66 @@ public class Controller implements ActionListener, ChangeListener, BasicPlayerLi
       modelTable1.addRow(rowData1);
     }
   }
+
+  public void printSpotifyTable(Map<String, List<Track>> tracks) {
+
+    this.view.getTextFieldSpotify().setText("");
+    this.view.getSpotifyTable().setRowSorter(null);
+
+    String[] columnas = new String[]{"Nombre", "Artista", "Álbum", "Playlist", "URL"};
+    Object[][] filas = new Object[][]{};
+    DefaultTableModel modelTable = new DefaultTableModel(filas, columnas) {
+      private static final long serialVersionUID = -2L;
+      boolean[] columnEditables = new boolean[]{true, true, true, true, false};
+
+      @Override
+      public boolean isCellEditable(int row, int column) {
+        return columnEditables[column];
+      }
+    };
+    this.view.getSpotifyTable().setModel(modelTable);
+    renderingLinks();
+
+    for (Entry<String, List<Track>> trackEntry : tracks.entrySet()) {
+
+      for (Track track : trackEntry.getValue()) {
+        Object[] rowData1 = new Object[5];
+        List<String> artists = Arrays.stream(track.getArtists()).map(ArtistSimplified::getName)
+            .toList();
+
+        rowData1[0] = track.getName();
+        rowData1[1] = artists.size() == 1 ? artists.getFirst()
+            : artists.getFirst() + " ft. " + artists.stream().skip(1)
+                .collect(Collectors.joining(", "));
+        rowData1[2] = track.getAlbum().getName();
+        rowData1[3] = trackEntry.getKey();
+        rowData1[4] = track.getExternalUrls().getExternalUrls().get("spotify");
+
+        modelTable.addRow(rowData1);
+      }
+    }
+    view.getLblTotalTracks().setText("Total canciones: " + tracks.values().stream().mapToLong(List::size).sum());
+  }
+
+  private void renderingLinks() {
+    this.view.getSpotifyTable().getColumnModel().getColumn(4).setCellRenderer(new DefaultTableCellRenderer() {
+    @Override
+    public Component getTableCellRendererComponent(JTable table, Object value,
+        boolean isSelected, boolean hasFocus, int row, int column) {
+
+      JLabel label = new JLabel("<html><a href=''>" + value + "</a></html>");
+      label.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+      label.setToolTipText("Haz clic para abrir en Spotify");
+
+      if (isSelected) {
+        label.setForeground(table.getSelectionForeground());
+        label.setBackground(table.getSelectionBackground());
+        label.setOpaque(true);
+      }
+
+      return label;
+    }
+  });}
 
   /**
    * This method generate a random integer for select a random song when option random is active
@@ -163,7 +255,7 @@ public class Controller implements ActionListener, ChangeListener, BasicPlayerLi
   }
 
   /**
-   * This method get a volume balance in each song
+   * This method gets a volume balance in each song
    */
   public void principalVolume() {
     try {
@@ -174,8 +266,8 @@ public class Controller implements ActionListener, ChangeListener, BasicPlayerLi
   }
 
   /**
-   * Override method for implement ActionListener interface, this method listen any event produce by
-   * a JButton in GUI
+   * Override method for implement ActionListener interface, this method listens any event produce
+   * by a JButton in GUI
    *
    * @param e ActionEvent of any JButton in GUI
    */
@@ -285,7 +377,7 @@ public class Controller implements ActionListener, ChangeListener, BasicPlayerLi
     }
     if (pushButton == view.getMntmAbout()) {
       JOptionPane.showMessageDialog(null,
-          "Desarrollado por: Jhonatan Guzm\u00E1n\nPara Programaci\u00F3n Orientada a Objetos 2013 - I",
+          "Desarrollado por: Jhonatan Guzmán\nPara Programación Orientada a Objetos 2013 - I",
           "Acerca de", 1);
     }
     if (pushButton == view.getBtnDel()) {
@@ -305,18 +397,26 @@ public class Controller implements ActionListener, ChangeListener, BasicPlayerLi
       file = this.view.getTableListSong().convertRowIndexToModel(file);
 
       JOptionPane.showMessageDialog(null,
-          "T\u00EDtulo: " +
+          "Título: " +
               this.listMusic.getFileSong().get(file).getTitle() + "\n" +
               "Autor: " +
               this.listMusic.getFileSong().get(file).getAuthor() + "\n" +
-              "\u00E1lbum: " +
+              "Álbum: " +
               this.listMusic.getFileSong().get(file).getAlbum() + "\n" +
-              "Duraci\u00F3n: " +
+              "Duración: " +
               this.listMusic.getFileSong().get(file).getTime() + "\n" +
-              "A\u00F1o: " +
-              this.listMusic.getFileSong().get(file).getYear(), "Informaci\u00F3n", 1);
+              "Año: " +
+              this.listMusic.getFileSong().get(file).getYear(), "Información", 1);
     }
-
+    if (pushButton == view.getBtnConnectSpotify()) {
+      buildSpotify();
+    }
+    if (pushButton == view.getBtnLoadTracks()) {
+      getTracksFromCurrentPlaylists(getCurrentUserSpotifyPlaylists());
+    }
+    if (pushButton == view.getBtnRefreshToken()) {
+      refreshSpotifyToken();
+    }
     if (pushButton == view.getRdbtnNormal()) {
       this.listMusic.setOption(0);
     }
@@ -337,10 +437,10 @@ public class Controller implements ActionListener, ChangeListener, BasicPlayerLi
       this.playFromTable();
     }
     if (pushButton == view.getEdtPopmenu()) {
-      //TODO
+      //TODO: Not usage?
     }
     if (pushButton == view.getQuitPopmenu()) {
-      //TODO
+      //TODO: Not usage?
     }
   }
 
@@ -371,6 +471,7 @@ public class Controller implements ActionListener, ChangeListener, BasicPlayerLi
    */
   @Override
   public void opened(Object arg0, Map properties) {
+    //TODO: Currently is not being used
     this.listMusic.setBytesLength(0);
 
     if (properties.containsKey("audio.length.bytes")) {
@@ -378,11 +479,11 @@ public class Controller implements ActionListener, ChangeListener, BasicPlayerLi
           Double.parseDouble(properties.get("audio.length.bytes").toString()));
     }
 
-    String album = "Informaci\u00F3n desconocida";
-    String title = "Informaci\u00F3n desconocida";
-    String author = "Informaci\u00F3n desconocida";
-    String time = "Informaci\u00F3n desconocida";
-    String year = "Informaci\u00F3n desconocida";
+    String album = "Información desconocida";
+    String title = "Información desconocida";
+    String author = "Información desconocida";
+    String time = "Información desconocida";
+    String year = "Información desconocida";
 
     if (properties.containsKey("album")) {
       album = properties.get("album").toString();
@@ -398,25 +499,17 @@ public class Controller implements ActionListener, ChangeListener, BasicPlayerLi
       int mili = (int) (microseconds / 1000);
       int sec = (mili / 1000) % 60;
       int min = (mili / 1000) / 60;
-      time = String.valueOf(min) + ":" + String.valueOf(sec);
+      time = min + ":" + sec;
       if (sec >= 0 && sec <= 9) {
-        time = String.valueOf(min) + ":" + "0" + String.valueOf(sec);
+        time = min + ":" + "0" + sec;
       }
     }
     if (properties.containsKey("date")) {
       year = properties.get("date").toString();
     }
 
-    //TODO in process to delete this listener
-    //this.listmusic.getFileSong().get(this.listmusic.getK()).setAlbum(album);
-    //this.listmusic.getFileSong().get(this.listmusic.getK()).setTitle(title);
-    //this.listmusic.getFileSong().get(this.listmusic.getK()).setAuthor(author);
-    //this.listmusic.getFileSong().get(this.listmusic.getK()).setTime(time);
-    //this.listmusic.getFileSong().get(this.listmusic.getK()).setYear(year);
-
     System.out.println("Cargando imagen");
     loadImgSong();
-
   }
 
   /**
@@ -440,9 +533,9 @@ public class Controller implements ActionListener, ChangeListener, BasicPlayerLi
     int mili = (int) (microseconds / 1000);
     int sec = (mili / 1000) % 60;
     int min = (mili / 1000) / 60;
-    String time = String.valueOf(min) + ":" + String.valueOf(sec);
+    String time = min + ":" + sec;
     if (sec >= 0 && sec <= 9) {
-      time = String.valueOf(min) + ":" + "0" + String.valueOf(sec);
+      time = min + ":" + "0" + sec;
     }
     this.view.getLblTime().setText(time);
   }
@@ -534,21 +627,42 @@ public class Controller implements ActionListener, ChangeListener, BasicPlayerLi
 
   /**
    * Override method for implement MouseListener interface, when you click in a row of JTable,
-   * select a index and play the song with that index in ArrayList
+   * select an index and play the song with that index in ArrayList
    *
    * @param e MouseEvent
    */
   @Override
   public void mouseClicked(MouseEvent e) {
-    if (e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e)) {
-      this.playFromTable();
-    }
-    if (e.getClickCount() == 1 && SwingUtilities.isRightMouseButton(e) && e.isPopupTrigger()) {
-      Point p = e.getPoint();
-      int rowNumber = this.view.getTableListSong().rowAtPoint(p);
-      ListSelectionModel modelo = this.view.getTableListSong().getSelectionModel();
-      modelo.setSelectionInterval(rowNumber, rowNumber);
-      this.view.getPopmenu().show(e.getComponent(), e.getX(), e.getY());
+
+    Object source = e.getSource();
+
+    if (source == this.view.getTableListSong()) {
+      if (e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e)) {
+        this.playFromTable();
+      }
+      if (e.getClickCount() == 1 && SwingUtilities.isRightMouseButton(e) && e.isPopupTrigger()) {
+        Point p = e.getPoint();
+        int rowNumber = this.view.getTableListSong().rowAtPoint(p);
+        ListSelectionModel modelo = this.view.getTableListSong().getSelectionModel();
+        modelo.setSelectionInterval(rowNumber, rowNumber);
+        this.view.getPopmenu().show(e.getComponent(), e.getX(), e.getY());
+      }
+    } else if (source == this.view.getSpotifyTable()) {
+      if (e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e)) {
+        int row = view.getSpotifyTable().rowAtPoint(e.getPoint());
+        int col = view.getSpotifyTable().columnAtPoint(e.getPoint());
+
+        if (col == 4 && row != -1) {
+          Object url = view.getSpotifyTable().getValueAt(row, col);
+          if (url != null) {
+            try {
+              Desktop.getDesktop().browse(new URI(url.toString()));
+            } catch (Exception ex) {
+              ex.printStackTrace();
+            }
+          }
+        }
+      }
     }
   }
 
@@ -611,34 +725,22 @@ public class Controller implements ActionListener, ChangeListener, BasicPlayerLi
 
   @Override
   public void keyReleased(KeyEvent e) {
-    String regExp = this.view.getTextFieldSearch().getText();
+    Object source = e.getSource();
 
-    regExp = toRegExpWithLowerAndUpper(regExp);
-    regExp = ".*" + regExp + ".*";
-    //Looking for accent vowels
-    //Cuidado! Se est� usando unicode mas no ascii, revisar opciones
-//		char char1[] = new char[10];
-//		char1[0] = '�';
-//		char1[1] = '�';
-//		char1[2] = '�';
-//		char1[3] = '�';
-//		char1[4] = '�';
-//		char1[5] = '�';
-//		char1[6] = '�';
-//		char1[7] = '�';
-//		char1[8] = '�';
-//		char1[9] = '�';
-//
-//		for (int i = 0; i < char1.length; i++) {
-//			System.out.println((int)char1[i]);
-//		}
-
-//		System.out.println(regExp);
-
-    TableRowSorter<TableModel> trs2 = new TableRowSorter<>(this.view.getTableListSong().getModel());
-    trs2.setRowFilter(RowFilter.regexFilter(regExp, 0));
-
-    this.view.getTableListSong().setRowSorter(trs2);
+    if (source == this.view.getTextFieldSearch()) {
+      String regExp = toRegExpWithLowerAndUpper(this.view.getTextFieldSearch().getText());
+      TableRowSorter<TableModel> trs2 = new TableRowSorter<>(
+          this.view.getTableListSong().getModel());
+      trs2.setRowFilter(RowFilter.regexFilter(regExp, 0));
+      this.view.getTableListSong().setRowSorter(trs2);
+    } else if (source == this.view.getTextFieldSpotify()) {
+      String regExp = toRegExpWithLowerAndUpper(this.view.getTextFieldSpotify().getText());
+      TableRowSorter<TableModel> trs2 = new TableRowSorter<>(
+          this.view.getSpotifyTable().getModel());
+      trs2.setRowFilter(RowFilter.regexFilter(regExp, 0, 1, 2, 3));
+      this.view.getSpotifyTable().setRowSorter(trs2);
+      this.view.getLblTotalTracks().setText("Canciones buscadas: " + trs2.getViewRowCount());
+    }
   }
 
   @Override
@@ -756,12 +858,11 @@ public class Controller implements ActionListener, ChangeListener, BasicPlayerLi
   }
 
   private String toRegExpWithLowerAndUpper(String regExp) {
-    char aux[] = regExp.toCharArray();
+    char[] aux = regExp.toCharArray();
     StringBuilder sb = new StringBuilder();
-    String tmp = "";
+    String tmp;
 
     for (int i = 0; i < regExp.length(); i++) {
-      tmp = "";
       if (aux[i] == 'A' || aux[i] == 'a' || (int) aux[i] == 193 || (int) aux[i] == 225) {
         tmp = "(" + "A" + "|" + (char) 193 + "|a" + "|" + (char) 225 + ")";
         sb.append(tmp);
@@ -783,14 +884,14 @@ public class Controller implements ActionListener, ChangeListener, BasicPlayerLi
       } else if ((int) aux[i] >= 97 && (int) aux[i] <= 122) {
         tmp = "(" + (char) (aux[i] - 32) + "|" + aux[i] + ")";
         sb.append(tmp);
-      } else if (aux[i] == '\u00F1' || aux[i] == '\u00D1') {
-        tmp = "(\u00F1|\u00D1)";
+      } else if (aux[i] == 'ñ' || aux[i] == 'Ñ') {
+        tmp = "(ñ|Ñ)";
         sb.append(tmp);
       } else {
         sb.append(aux[i]);
       }
     }
-    return sb.toString();
+    return ".*" + sb + ".*";
   }
 
   private void loadImgSong() {
@@ -808,51 +909,6 @@ public class Controller implements ActionListener, ChangeListener, BasicPlayerLi
 
       byte[] albumImageData = id3v2Tag.getAlbumImage();
       if (albumImageData != null) {
-        //TODO Fix a issue with Denied access exception by administrator permission
-        //Not write the image in separated file
-				/*
-				File newFile= new File("temp.jpg");
-				BufferedImage imag = null;
-
-				try {
-					imag = ImageIO.read(new ByteArrayInputStream(albumImageData));
-				} catch (IOException e1) {
-					e1.printStackTrace();
-				}
-
-				if(!(imag==null)) {
-					try {
-						ImageIO.write(imag, "jpg", newFile);
-					} catch (IOException e1) {
-						e1.printStackTrace();
-					}
-				}
-				else
-				{
-					System.out.println("Etiqueta encontrada pero sin imagen");
-				}*/
-
-				/* A continuacion otro metodo para recuperar la imagen
-
-				String mimeType = id3v2Tag.getAlbumImageMimeType();
-				// Write image to file - can determine appropriate file extension from the mime type
-				RandomAccessFile file = null;
-				try {
-					file = new RandomAccessFile("album-artwork.jpg", "rw");
-				} catch (FileNotFoundException e1) {
-					e1.printStackTrace();
-				}
-				try {
-					file.write(albumImageData);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-				try {
-					file.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				} */
-
         ImageIcon icon = new ImageIcon(albumImageData);
         Icon icono = new ImageIcon(icon.getImage()
             .getScaledInstance(this.view.getBtnImgSong().getWidth(),
@@ -865,10 +921,136 @@ public class Controller implements ActionListener, ChangeListener, BasicPlayerLi
                 this.view.getBtnImgSong().getHeight(), Image.SCALE_DEFAULT));
         this.view.getBtnImgSong().setIcon(icono);
         System.out.println(
-            "No hay imagen disponible para la canci\u00F3n " + this.listMusic.getFileSong()
+            "No hay imagen disponible para la canción " + this.listMusic.getFileSong()
                 .get(listMusic.getCurrentIndexSong()).getSelectedSong().getName());
 
       }
+    }
+  }
+
+  private void httpServerListener() {
+    Javalin.create(config ->
+        config.routes.get("/callback", ctx -> {
+          String code = ctx.queryParam("code");
+          if (code != null) {
+            System.out.println("Code: " + code);
+            AuthorizationCodeRequest request = spotifyApi.authorizationCode(code).build();
+            AuthorizationCodeCredentials credentials = request.execute();
+
+            spotifyApi.setAccessToken(credentials.getAccessToken());
+            spotifyApi.setRefreshToken(credentials.getRefreshToken());
+
+            System.out.println("✅ Access Token: " + credentials.getAccessToken());
+            System.out.println("🔄 Refresh Token: " + credentials.getRefreshToken());
+            System.out.println("Token expires in: " + credentials.getExpiresIn());
+
+            ctx.result("Ya puede cerrar esta ventana.");
+          } else {
+            ctx.result("Error: el code parameter no fue enviado en la solicitud");
+          }
+        })
+    ).start();
+  }
+
+  private void buildSpotify() {
+    //TODO: Hardcoded values
+    httpServerListener();
+
+    this.spotifyApi = new SpotifyApi.Builder()
+        .setClientId("")
+        .setClientSecret("")
+        .setRedirectUri(SpotifyHttpManager.makeUri("http://[::1]:8080/callback"))
+        .build();
+
+    spotifyApi.authorizationCodeUri()
+        .scope("user-read-private,user-read-email,playlist-read-private")
+        .show_dialog(true)
+        .build().executeAsync()
+        .thenAccept(authorizationCode -> {
+          System.out.println(
+              "Para continuar con Spotify, por favor inicia sesión en: " + authorizationCode);
+          try {
+            Desktop.getDesktop().browse(authorizationCode);
+          } catch (IOException e) {
+            throw new RuntimeException(e);
+          }
+        });
+  }
+
+  private List<PlaylistSimplified> getCurrentUserSpotifyPlaylists() {
+    //TODO: Hardcoded values
+    Set<String> allowedUsers = Set.of("22d6cnnf44imvjxjnxjhbja4y", "osuarezd1994");
+    try {
+      return Arrays.stream(spotifyApi.getListOfCurrentUsersPlaylists().build().execute().getItems())
+          .filter(playlist -> allowedUsers.contains(playlist.getOwner().getId()))
+          .toList();
+    } catch (IOException | SpotifyWebApiException | ParseException ex) {
+      throw new RuntimeException(ex);
+    }
+  }
+
+  private void getTracksFromCurrentPlaylists(List<PlaylistSimplified> playlists) {
+    Map<String, List<Track>> tracksByPlaylist = playlists.parallelStream()
+        .collect(Collectors.toConcurrentMap(
+            PlaylistSimplified::getName,
+            playlistSimplified -> {
+
+              int limit = 100;
+
+              Paging<PlaylistTrack> firstPage = null;
+              try {
+                firstPage = spotifyApi.getPlaylistsItems(
+                        playlistSimplified.getId())
+                    .offset(0)
+                    .limit(limit)
+                    .build()
+                    .execute();
+
+                int total = firstPage.getTotal();
+                int totalPages = (int) Math.ceil(total / (double) limit);
+
+                List<CompletableFuture<PlaylistTrack[]>> pageFutures = IntStream.range(1,
+                        totalPages)
+                    .mapToObj(pageIndex -> {
+                      int offset = pageIndex * limit;
+                      return spotifyApi.getPlaylistsItems(playlistSimplified.getId())
+                          .offset(offset)
+                          .limit(limit)
+                          .build()
+                          .executeAsync()
+                          .thenApply(Paging::getItems);
+                    })
+                    .toList();
+
+                List<PlaylistTrack> allTracks = new ArrayList<>(
+                    Arrays.asList(firstPage.getItems()));
+                pageFutures.stream()
+                    .map(CompletableFuture::join)
+                    .forEach(elements -> allTracks.addAll(Arrays.asList(elements)));
+                return allTracks.stream()
+                    .map(PlaylistTrack::getTrack)
+                    .filter(e -> e instanceof Track)
+                    .map(e -> (Track) e)
+                    .sorted(Comparator.comparing(Track::getName))
+                    .toList();
+              } catch (IOException | SpotifyWebApiException | ParseException e) {
+                throw new RuntimeException(e);
+              }
+            }));
+    printSpotifyTable(tracksByPlaylist);
+  }
+
+  private void refreshSpotifyToken() {
+    AuthorizationCodeCredentials authorizationCodeCredentials = null;
+    try {
+      authorizationCodeCredentials = spotifyApi
+          .authorizationCodeRefresh()
+          .build().execute();
+      spotifyApi.setAccessToken(authorizationCodeCredentials.getAccessToken());
+      System.out.println("✅ Access Token: " + authorizationCodeCredentials.getAccessToken());
+      System.out.println("Token expires in: " + authorizationCodeCredentials.getExpiresIn());
+    } catch (IOException | SpotifyWebApiException | ParseException e) {
+      throw new RuntimeException(e);
     }
   }
 }

@@ -11,8 +11,8 @@ import javazoom.jlgui.basicplayer.BasicPlayerException;
 import co.edu.unal.controller.Action;
 
 /**
- * Playlist class contains a ArrayList with instance of Song class for simulates a Playlist of songs
- * and different options to apply
+ * Playlist class contains an ArrayList with instance of Song class for simulates a Playlist of songs
+ * and different options to apply. This class pretends to play music in GUI. Do not use it for another purpose
  *
  * @author Jhonatan Guzmán
  */
@@ -29,7 +29,7 @@ public class Playlist extends Action implements Serializable {
   private double volume = 1.0;
 
   /**
-   * Constructs a new instance of Playlist class initializing a ArrayList of Song's instance
+   * Constructs a new instance of Playlist class initializing an ArrayList of Song's instance
    *
    * @param fileSong ArrayList of Song's instance
    */
