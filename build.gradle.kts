@@ -34,3 +34,11 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
 }
+
+tasks.shadowJar {
+    manifest {
+        attributes(
+            "Main-Class" to "co.edu.unal.Main"
+        )
+    }
+}
