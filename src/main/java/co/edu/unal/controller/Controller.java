@@ -929,29 +929,27 @@ public class Controller implements ActionListener, ChangeListener, BasicPlayerLi
   }
 
   private void httpServerListener() {
-    //TODO: Hardcoded port
-    Javalin app = Javalin.create().start(8080);
+    Javalin.create(config ->
+        config.routes.get("/callback", ctx -> {
+          String code = ctx.queryParam("code");
+          if (code != null) {
+            System.out.println("Code: " + code);
+            AuthorizationCodeRequest request = spotifyApi.authorizationCode(code).build();
+            AuthorizationCodeCredentials credentials = request.execute();
 
-    app.get("/callback", ctx -> {
-      String code = ctx.queryParam("code");
+            spotifyApi.setAccessToken(credentials.getAccessToken());
+            spotifyApi.setRefreshToken(credentials.getRefreshToken());
 
-      if (code != null) {
-        System.out.println("Code: " + code);
-        AuthorizationCodeRequest request = spotifyApi.authorizationCode(code).build();
-        AuthorizationCodeCredentials credentials = request.execute();
+            System.out.println("✅ Access Token: " + credentials.getAccessToken());
+            System.out.println("🔄 Refresh Token: " + credentials.getRefreshToken());
+            System.out.println("Token expires in: " + credentials.getExpiresIn());
 
-        spotifyApi.setAccessToken(credentials.getAccessToken());
-        spotifyApi.setRefreshToken(credentials.getRefreshToken());
-
-        System.out.println("✅ Access Token: " + credentials.getAccessToken());
-        System.out.println("🔄 Refresh Token: " + credentials.getRefreshToken());
-        System.out.println("Token expires in: " + credentials.getExpiresIn());
-
-        ctx.result("Ya puede cerrar esta ventana.");
-      } else {
-        ctx.result("Error: el code parameter no fue enviado en la solicitud");
-      }
-    });
+            ctx.result("Ya puede cerrar esta ventana.");
+          } else {
+            ctx.result("Error: el code parameter no fue enviado en la solicitud");
+          }
+        })
+    ).start();
   }
 
   private void buildSpotify() {
