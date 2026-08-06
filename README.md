@@ -2,4 +2,11 @@
 
 ## Instalación
 
-mvn clean install package
+ ``` 
+gradle build
+
+ ``` 
+
+## Notas:
+
+- Actualización a Java 25 y Gradle 9

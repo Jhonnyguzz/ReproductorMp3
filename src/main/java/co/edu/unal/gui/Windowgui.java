@@ -37,6 +37,7 @@ public class Windowgui extends JFrame {
   private static final long serialVersionUID = 1L;
   private JPanel repPane;
   private JPanel infoPane;
+  private JPanel spotifyPane;
   private JButton btnPlay;
   private JButton btnStop;
   private JButton btnPrev;
@@ -79,8 +80,16 @@ public class Windowgui extends JFrame {
   private JMenuItem edtPopmenu;
   private JMenuItem quitPopmenu;
   private JScrollPane scrollPane;
+  private JScrollPane scrollSpotifyPane;
   private JTable table;
+  private JTable spotifyTable;
   private JTextField textFieldSearch;
+  private JLabel lblSearchSpotify;
+  private JLabel lblTotalTracks;
+  private JTextField textFieldSpotify;
+  private JButton btnConnectSpotify;
+  private JButton btnLoadTracks;
+  private JButton btnRefreshToken;
 
   /**
    * Constructs an instance of windowgui, also add properties of a window as title, bounds, JPanel,
@@ -108,7 +117,7 @@ public class Windowgui extends JFrame {
     mnFile = new JMenu("Archivo");
     jMenuBar.add(mnFile);
 
-    mntmOpen = new JMenuItem("Abrir canci\u00F3n");
+    mntmOpen = new JMenuItem("Abrir canción");
     mnFile.add(mntmOpen);
 
     mntmOpenDir = new JMenuItem("Abrir directorio");
@@ -123,7 +132,7 @@ public class Windowgui extends JFrame {
     mntmExit = new JMenuItem("Salir");
     mnFile.add(mntmExit);
 
-    mnEdit = new JMenu("Edici\u00F3n");
+    mnEdit = new JMenu("Edición");
     jMenuBar.add(mnEdit);
 
     mnOrder = new JMenu("Ordenar");
@@ -153,7 +162,7 @@ public class Windowgui extends JFrame {
     btnPlay.setOpaque(false);
     repPane.add(btnPlay);
 
-    btnStop = new JButton("\u25A0");
+    btnStop = new JButton("■");
     btnStop.setBounds(209, 404, 51, 23);
     btnStop.setOpaque(false);
     repPane.add(btnStop);
@@ -185,8 +194,7 @@ public class Windowgui extends JFrame {
     repPane.add(btnNext);
 
     tableListSong = new JTable(
-        new DefaultTableModel(null, new String[]{"Lista de Reproducci\u00F3n"}));
-    //tableListSong.setRowSorter(new TableRowSorter<>(tableListSong.getModel()));
+        new DefaultTableModel(null, new String[]{"Lista de Reproducción"}));
     scroll = new JScrollPane(tableListSong);
     scroll.setBounds(491, 42, 202, 281);
     repPane.add(scroll);
@@ -197,7 +205,7 @@ public class Windowgui extends JFrame {
     rdbtnLoopList.setOpaque(false);
     repPane.add(rdbtnLoopList);
 
-    rdbtnLoopSong = new JRadioButton("Repetir canci\u00F3n");
+    rdbtnLoopSong = new JRadioButton("Repetir canción");
     buttonGroup.add(rdbtnLoopSong);
     rdbtnLoopSong.setBounds(576, 370, 117, 23);
     rdbtnLoopSong.setOpaque(false);
@@ -271,7 +279,7 @@ public class Windowgui extends JFrame {
         new Object[][]{
         },
         new String[]{
-            "Nombre", "Artista", "\u00C1lbum", "A\u00F1o", "G\u00E9nero"
+            "Nombre", "Artista", "Álbum", "Año", "Género"
         }
     ));
     scrollPane = new JScrollPane(table);
@@ -279,6 +287,48 @@ public class Windowgui extends JFrame {
 
     tabbedPane.addTab("Detalles", infoPane);
 
-    getContentPane().add(tabbedPane, "name_430147323327930");
+    spotifyPane = new JPanel();
+    spotifyPane.setBorder(new EmptyBorder(50, 5, 10, 5));
+    spotifyPane.setLayout(null);
+
+    spotifyTable = new JTable(new DefaultTableModel(
+        new Object[][]{
+        },
+        new String[]{
+            "Nombre", "Artista", "Álbum", "Playlist", "URL"
+        }
+    ));
+    scrollSpotifyPane = new JScrollPane(spotifyTable);
+    scrollSpotifyPane.setBounds(5, 50, 693, 369);
+    spotifyPane.add(scrollSpotifyPane);
+
+    tabbedPane.addTab("Spotify", spotifyPane);
+    
+    lblSearchSpotify = new JLabel("Buscar");
+    lblSearchSpotify.setBounds(5, 25, 91, 14);
+    spotifyPane.add(lblSearchSpotify);
+    
+    lblTotalTracks = new JLabel("Total Canciones: 0");
+    lblTotalTracks.setBounds(5, 425, 203, 14);
+    spotifyPane.add(lblTotalTracks);
+    
+    textFieldSpotify = new JTextField();
+    textFieldSpotify.setBounds(76, 19, 203, 20);
+    spotifyPane.add(textFieldSpotify);
+    textFieldSpotify.setColumns(10);
+    
+    btnConnectSpotify = new JButton("Conectar Spotify");
+    btnConnectSpotify.setBounds(298, 18, 121, 23);
+    spotifyPane.add(btnConnectSpotify);
+    
+    btnLoadTracks = new JButton("Cargar Canciones");
+    btnLoadTracks.setBounds(429, 18, 127, 23);
+    spotifyPane.add(btnLoadTracks);
+
+    btnRefreshToken = new JButton("Refrescar Token");
+    btnRefreshToken.setBounds(560, 18, 127, 23);
+    spotifyPane.add(btnRefreshToken);
+
+    getContentPane().add(tabbedPane);
   }
 }
