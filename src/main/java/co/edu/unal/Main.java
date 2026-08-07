@@ -1,28 +1,21 @@
 package co.edu.unal;
 
-import com.formdev.flatlaf.FlatLightLaf;
-import java.awt.EventQueue;
-
-import javax.swing.*;
-
-import com.melloware.jintellitype.JIntellitype;
-
 import co.edu.unal.controller.Controller;
 import co.edu.unal.controller.ControllerForWindows;
 import co.edu.unal.model.Playlist;
-import co.edu.unal.gui.Windowgui;
+import co.edu.unal.ui.Windowgui;
+import co.edu.unal.ui.WindowguiMigLayout;
+import com.formdev.flatlaf.FlatLightLaf;
+import com.melloware.jintellitype.JIntellitype;
+import java.awt.EventQueue;
+import javax.swing.JFrame;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
+import lombok.extern.slf4j.Slf4j;
 
-/**
- * Principal class
- *
- * @author Jhonatan Guzmán
- */
+@Slf4j
 public class Main {
 
-  /**
-   * Principal method for run applet
-   *
-   */
   static void main() {
     EventQueue.invokeLater(() -> {
       try {
@@ -42,18 +35,28 @@ public class Main {
         //UIManager.setLookAndFeel(new NimbusLookAndFeel());
 
         Windowgui view = new Windowgui();
-        Playlist listMusic = new Playlist();
-        /*
-         * Only if you have Windows 64bits - check for you OS and JIntellitype.dll (64bits)
-         */
-        if (JIntellitype.isJIntellitypeSupported()) {
-          System.out.println("Using hotkeys for windows (Only 64bits)");
-          new ControllerForWindows(view, listMusic);
+        WindowguiMigLayout viewMigLayout = new WindowguiMigLayout();
+        Playlist playlist = new Playlist();
+
+        if (true) {
+          if (JIntellitype.isJIntellitypeSupported()) {
+            log.info("Using hotkeys for windows (Only 64bits)");
+            new ControllerForWindows(view, playlist);
+          } else {
+            log.info("JIntellitype.dll was not detected on System32 (Only Windows 64bits)");
+            new Controller(view, playlist);
+          }
+          view.setVisible(true);
         } else {
-          System.out.println("JIntellitype.dll was not detected on System32 (Only Windows 64bits)");
-          new Controller(view, listMusic);
+          if (JIntellitype.isJIntellitypeSupported()) {
+            log.info("Using hotkeys for windows (Only 64bits)");
+            new ControllerForWindows(viewMigLayout, playlist);
+          } else {
+            log.info("JIntellitype.dll was not detected on System32 (Only Windows 64bits)");
+            new Controller(viewMigLayout, playlist);
+          }
+          viewMigLayout.setVisible(true);
         }
-        view.setVisible(true);
       } catch (UnsupportedLookAndFeelException e) {
         throw new RuntimeException(e);
       }

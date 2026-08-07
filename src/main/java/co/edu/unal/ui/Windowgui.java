@@ -1,10 +1,9 @@
-package co.edu.unal.gui;
+package co.edu.unal.ui;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Image;
 import java.awt.Toolkit;
-
 import java.util.Objects;
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
@@ -21,80 +20,12 @@ import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.JTextField;
-import lombok.Getter;
 
-/**
- * Class that contains GUI
- *
- * @author Jhonatan Guzmán
- */
-@Getter
-public class Windowgui extends JFrame {
+public class Windowgui extends Mp3Window {
 
-  private static final long serialVersionUID = 1L;
-  private JPanel repPane;
-  private JPanel infoPane;
-  private JPanel spotifyPane;
-  private JButton btnPlay;
-  private JButton btnStop;
-  private JButton btnPrev;
-  private JButton btnNext;
-  private JButton btnDel;
-  private JSlider sliderRep;
-  private JSlider sliderVol;
-  private JLabel lblTime;
-  private JLabel lblVol;
-  private JTable tableListSong;
-  private JScrollPane scroll;
-  private JRadioButton rdbtnLoopList;
-  private JRadioButton rdbtnLoopSong;
-  private JRadioButton rdbtnNormal;
-  private JRadioButton rdbtnRandom;
-  private JRadioButton rdbtnJustOnce;
-  private JMenuBar jMenuBar;
-  private JMenu mnFile;
-  private JMenuItem mntmOpen;
-  private JMenuItem mntmOpenDir;
-  private JMenuItem mntmOpenList;
-  private JMenuItem mntmSaveList;
-  private JMenuItem mntmExit;
-  private JMenu mnEdit;
-  private JMenu mnOrder;
-  private JMenuItem mntmOrderAz;
-  private JMenuItem mntmOrderZa;
-  private JMenuItem mntmRemoveList;
-  private JMenu mnHelp;
-  private JMenuItem mntmAbout;
-  private JLabel nameSongs;
-  private JMenuItem btnInfo;
-  private ButtonGroup buttonGroup = new ButtonGroup();
-  private JLabel btnImgSong;
-  private ImageIcon fondo = new ImageIcon(
-      Objects.requireNonNull(getClass().getResource("/note.png")));
-  private JTabbedPane tabbedPane;
-  private JPopupMenu popmenu;
-  private JMenuItem repPopmenu;
-  private JMenuItem edtPopmenu;
-  private JMenuItem quitPopmenu;
-  private JScrollPane scrollPane;
-  private JScrollPane scrollSpotifyPane;
-  private JTable table;
-  private JTable spotifyTable;
-  private JTextField textFieldSearch;
-  private JLabel lblSearchSpotify;
-  private JLabel lblTotalTracks;
-  private JTextField textFieldSpotify;
-  private JButton btnConnectSpotify;
-  private JButton btnLoadTracks;
-  private JButton btnRefreshToken;
-
-  /**
-   * Constructs an instance of windowgui, also add properties of a window as title, bounds, JPanel,
-   * buttons...
-   */
   public Windowgui() {
     setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/logoun.png")));
     this.setTitle("Reproductor MP3");
@@ -199,6 +130,8 @@ public class Windowgui extends JFrame {
     scroll.setBounds(491, 42, 202, 281);
     repPane.add(scroll);
 
+    buttonGroup = new ButtonGroup();
+
     rdbtnLoopList = new JRadioButton("Repetir lista");
     buttonGroup.add(rdbtnLoopList);
     rdbtnLoopList.setBounds(576, 343, 117, 23);
@@ -242,6 +175,9 @@ public class Windowgui extends JFrame {
     btnDel.setBounds(594, 404, 69, 23);
     btnDel.setOpaque(false);
     repPane.add(btnDel);
+
+    fondo = new ImageIcon(
+        Objects.requireNonNull(getClass().getResource("/note.png")));
 
     btnImgSong = new JLabel("");
     btnImgSong.setBounds(10, 11, 445, 312);

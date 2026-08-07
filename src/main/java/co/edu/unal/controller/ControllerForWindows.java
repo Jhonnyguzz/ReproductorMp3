@@ -1,45 +1,26 @@
 package co.edu.unal.controller;
 
+import co.edu.unal.model.Playlist;
+import co.edu.unal.ui.Mp3Window;
 import com.melloware.jintellitype.HotkeyListener;
 import com.melloware.jintellitype.IntellitypeListener;
 import com.melloware.jintellitype.JIntellitype;
 
-import co.edu.unal.model.Playlist;
-import co.edu.unal.gui.Windowgui;
-
-/**
- * This class is the controller of pattern MVC, implements all Listeners that need
- *
- * @author Jhonatan Guzmán
- */
 public class ControllerForWindows extends Controller implements HotkeyListener,
     IntellitypeListener {
 
-  /**
-   * Constructs a instance of Controller class with instance of Windowgui and Playlist as parameters
-   * for add Listeners of these
-   *
-   * @param view      Instance of Windowgui class
-   * @param listmusic Instance of Playlist class
-   */
-  public ControllerForWindows(Windowgui view, Playlist listmusic) {
-    super(view, listmusic);
+  public ControllerForWindows(Mp3Window view, Playlist playlist) {
+    super(view, playlist);
 
     //Hotkeys
     JIntellitype.getInstance().addHotKeyListener(this);
     JIntellitype.getInstance().addIntellitypeListener(this);
   }
 
-  /**
-   * Hotkeys Listener
-   */
   public void onHotKey(int aIdentifier) {
     System.out.println("WM_HOTKEY message received " + aIdentifier);
   }
 
-  /**
-   * Hotkeys Listener
-   */
   public void onIntellitype(int aCommand) {
     switch (aCommand) {
       case JIntellitype.APPCOMMAND_BROWSER_BACKWARD ->

@@ -1,29 +1,22 @@
 package co.edu.unal.model;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.Serial;
-import java.io.Serializable;
-
 import com.mpatric.mp3agic.ID3v1;
 import com.mpatric.mp3agic.InvalidDataException;
 import com.mpatric.mp3agic.Mp3File;
 import com.mpatric.mp3agic.UnsupportedTagException;
-import lombok.Data;
+import java.io.File;
+import java.io.IOException;
+import java.io.Serial;
+import java.io.Serializable;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import se.michaelthelin.spotify.model_objects.IPlaylistItem;
+import lombok.extern.slf4j.Slf4j;
 
-/**
- * The class Song has atributes such as title song, author song, duration song, date about song,
- * album song and source file
- *
- * @author Jhonatan Guzmán
- */
 @Getter
 @Setter
 @NoArgsConstructor
+@Slf4j
 public class Song implements Serializable, Comparable<Song> {
 
   @Serial
@@ -36,11 +29,6 @@ public class Song implements Serializable, Comparable<Song> {
   private String year;
   private String genre;
 
-  /**
-   * Constructs a new instance of Song with File as parameter
-   *
-   * @param selectedSong File with mp3 song
-   */
   public Song(File selectedSong) {
     this.selectedSong = selectedSong;
     Mp3File mp3file;
@@ -69,26 +57,16 @@ public class Song implements Serializable, Comparable<Song> {
         setYear("Desconocido");
         setGenre("Desconocido");
       }
-    } catch (UnsupportedTagException | InvalidDataException | IOException e1) {
-      e1.printStackTrace();
-      System.err.println("Error asignando etiquetas ID3");
+    } catch (UnsupportedTagException | InvalidDataException | IOException e) {
+      log.error("Error assigning ID3 tags", e);
     }
   }
 
-  /**
-   * Override method from Object class
-   */
   @Override
   public String toString() {
     return "Suena: " + selectedSong;
   }
 
-  /**
-   * Override method for implement Comparable interface for compare two Songs to Ignore case
-   *
-   * @param other other Song's instance
-   * @return An Integer 1 or -1 for compare two Songs
-   */
   @Override
   public int compareTo(Song other) {
     return this.selectedSong.getName().compareToIgnoreCase(other.selectedSong.getName());

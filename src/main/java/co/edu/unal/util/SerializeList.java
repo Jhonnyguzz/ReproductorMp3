@@ -1,35 +1,25 @@
 package co.edu.unal.util;
 
+import co.edu.unal.model.Playlist;
+import co.edu.unal.model.Song;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
+import lombok.extern.slf4j.Slf4j;
 
-import co.edu.unal.model.Playlist;
-import co.edu.unal.model.Song;
-
-/**
- * this class implements Serializable interface to Serialize ListSong class and "Save" in disk a
- * Playlist, and also open Playlist
- */
+@Slf4j
 public class SerializeList implements Serializable {
 
+  @Serial
   private static final long serialVersionUID = 1L;
 
-  /**
-   * This method receives a String corresponding a File to Serialize ListSong class, and receives a
-   * instance of ListSong class to Serialize
-   *
-   * @param fileName String File
-   * @param ob       Playlist instance
-   * @throws FileNotFoundException
-   * @throws IOException
-   */
-  public static void Serializar(String fileName, Playlist ob) {
+  public static void serialize(String fileName, Playlist ob) {
     try {
       FileOutputStream output = new FileOutputStream(fileName);
       ObjectOutputStream oboutput = new ObjectOutputStream(output);
@@ -37,21 +27,13 @@ public class SerializeList implements Serializable {
       oboutput.close();
       output.close();
     } catch (FileNotFoundException e) {
-      e.printStackTrace();
+      log.error("File not found", e);
     } catch (IOException e) {
-      e.printStackTrace();
+      log.error("Error while serializing", e);
     }
   }
 
-  /**
-   * This method receives a String fileName to deserialize a instance of ListSong class and return
-   * only ArrayList of this
-   *
-   * @param fileName String File
-   * @return fileSong
-   * @throws Exception
-   */
-  public static ArrayList<Song> Desserializar(String fileName) {
+  public static ArrayList<Song> deserialize(String fileName) {
     Playlist obret = null;
     try {
       FileInputStream input = new FileInputStream(fileName);
@@ -61,7 +43,7 @@ public class SerializeList implements Serializable {
       obinput.close();
       input.close();
     } catch (Exception e) {
-      System.err.println("Could not load any playlist");
+      log.error("Could not load any playlist", e);
       return new ArrayList<>();
     }
     return obret.getFileSong();

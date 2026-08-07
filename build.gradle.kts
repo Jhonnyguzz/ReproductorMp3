@@ -18,6 +18,8 @@ dependencies {
     implementation("com.melloware:jintellitype:1.5.6")
     implementation("se.michaelthelin.spotify:spotify-web-api-java:9.4.0")
     implementation("io.javalin:javalin:7.2.2")
+    implementation("org.slf4j:slf4j-simple:2.0.18")
+    implementation("com.miglayout:miglayout-swing:11.4.3")
 
     compileOnly("org.projectlombok:lombok:1.18.46")
     annotationProcessor("org.projectlombok:lombok:1.18.46")
