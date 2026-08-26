@@ -89,62 +89,50 @@ public class SpotifyService {
         });
   }
 
-  public List<PlaylistSimplified> getCurrentUserPlaylists() {
-    try {
-      return Arrays.stream(spotifyApi.getListOfCurrentUsersPlaylists()
-          .build()
-          .execute()
-          .getItems())
-          .filter(playlist -> ALLOWED_USERS.contains(playlist.getOwner().getId()))
-          .toList();
-    } catch (IOException | SpotifyWebApiException | ParseException ex) {
-      log.error("Error obteniendo playlists: {}", ex.getMessage());
-      throw new RuntimeException("Error obteniendo playlists: " + ex.getMessage(), ex);
-    }
+  public CompletableFuture<List<PlaylistSimplified>> getCurrentUserPlaylistsAsync() {
+      return spotifyApi.getListOfCurrentUsersPlaylists()
+              .build()
+              .executeAsync()
+              .thenApplyAsync(Paging::getItems)
+              .thenApplyAsync(items -> Arrays.stream(items)
+                  .filter(playlist -> ALLOWED_USERS.contains(playlist.getOwner().getId()))
+                  .toList()
+              );
   }
 
-  public Map<String, List<Track>> getTracksFromPlaylists(List<PlaylistSimplified> playlists) {
-    log.info("Loading tracks from playlists...");
+  public Map<String, List<Track>> getTracksFromPlaylistsAsync(List<PlaylistSimplified> playlists) {
+    log.info("Loading tracks from playlists asynchronously...");
     return playlists.parallelStream()
         .collect(Collectors.toConcurrentMap(
             PlaylistSimplified::getName,
-            this::fetchPlaylistTracks
+            this::fetchPlaylistTracksAsync
         ));
   }
 
-  private List<Track> fetchPlaylistTracks(PlaylistSimplified playlist) {
-    try {
-      Paging<PlaylistTrack> firstPage = spotifyApi.getPlaylistsItems(playlist.getId())
-          .offset(0)
-          .limit(PLAYLIST_ITEMS_LIMIT)
-          .build()
-          .execute();
+  private List<Track> fetchPlaylistTracksAsync(PlaylistSimplified playlistSimplified) {
+    return spotifyApi.getPlaylistsItems(playlistSimplified.getId())
+        .offset(0)
+        .limit(PLAYLIST_ITEMS_LIMIT)
+        .build()
+        .executeAsync()
+        .thenApplyAsync(myFirstPage -> {
+          List<PlaylistTrack> allTracks = new ArrayList<>(
+              Arrays.asList(myFirstPage.getItems()));
 
-      List<PlaylistTrack> allTracks = new ArrayList<>(
-          Arrays.asList(firstPage.getItems()));
-      
-      int totalPages = (int) Math.ceil(firstPage.getTotal() / (double) PLAYLIST_ITEMS_LIMIT);
-
-      if (totalPages > 1) {
-        allTracks.addAll(fetchRemainingPages(playlist.getId(), totalPages));
-      }
-
-      return allTracks.stream()
-          .map(PlaylistTrack::getTrack)
-          .filter(track -> track instanceof Track)
-          .map(track -> (Track) track)
-          .sorted(Comparator.comparing(Track::getName))
-          .toList();
-
-    } catch (IOException | SpotifyWebApiException | ParseException e) {
-      log.error("Error cargando tracks: {}", e.getMessage());
-      throw new RuntimeException("Error cargando tracks: " + e.getMessage(), e);
-    }
+          int totalPages = (int) Math.ceil(myFirstPage.getTotal() / (double) PLAYLIST_ITEMS_LIMIT);
+          if (totalPages > 1) {
+            allTracks.addAll(fetchRemainingPagesAsync(playlistSimplified.getId(), totalPages));
+          }
+          return allTracks.stream()
+              .map(PlaylistTrack::getTrack)
+              .filter(track -> track instanceof Track)
+              .map(track -> (Track) track)
+              .sorted(Comparator.comparing(Track::getName))
+              .toList();
+        }).join();
   }
 
-  private List<PlaylistTrack> fetchRemainingPages(String playlistId, int totalPages) {
-    List<PlaylistTrack> allRemainingTracks = new ArrayList<>();
-
+  private List<PlaylistTrack> fetchRemainingPagesAsync(String playlistId, int totalPages) {
     List<CompletableFuture<PlaylistTrack[]>> pageFutures = IntStream.range(1, totalPages)
         .mapToObj(pageIndex -> {
           int offset = pageIndex * PLAYLIST_ITEMS_LIMIT;
@@ -153,17 +141,16 @@ public class SpotifyService {
               .limit(PLAYLIST_ITEMS_LIMIT)
               .build()
               .executeAsync()
-              .thenApply(Paging::getItems);
+              .thenApplyAsync(Paging::getItems);
         })
         .toList();
 
     CompletableFuture.allOf(pageFutures.toArray(CompletableFuture[]::new)).join();
-    pageFutures.stream()
+    return pageFutures.stream()
         .map(CompletableFuture::join)
         .peek(elements -> log.info("Fetched {} tracks from playlist {}", elements.length, playlistId))
-        .forEach(elements -> allRemainingTracks.addAll(Arrays.asList(elements)));
-
-    return allRemainingTracks;
+        .flatMap(Arrays::stream)
+        .toList();
   }
 
   public void refreshAccessToken() {
@@ -179,6 +166,10 @@ public class SpotifyService {
       log.error("Error renovando token: {}", e.getMessage());
       throw new RuntimeException("Error renovando token: " + e.getMessage(), e);
     }
+  }
+
+  public boolean isReady() {
+    return spotifyApi != null && spotifyApi.getAccessToken() != null;
   }
 
 }

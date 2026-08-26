@@ -17,7 +17,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
+import javax.swing.JOptionPane;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javazoom.jlgui.basicplayer.BasicController;
@@ -25,7 +25,6 @@ import javazoom.jlgui.basicplayer.BasicPlayerEvent;
 import javazoom.jlgui.basicplayer.BasicPlayerException;
 import javazoom.jlgui.basicplayer.BasicPlayerListener;
 import lombok.extern.slf4j.Slf4j;
-import se.michaelthelin.spotify.model_objects.specification.PlaylistSimplified;
 import se.michaelthelin.spotify.model_objects.specification.Track;
 
 @Slf4j
@@ -260,10 +259,24 @@ public class Controller implements ActionListener, ChangeListener, BasicPlayerLi
   }
 
   public void loadSpotifyTracks() {
-    //TODO: Delegate this to CompletableFuture, check the executeAsync from spotify
-    List<PlaylistSimplified> playlists = spotifyService.getCurrentUserPlaylists();
-    Map<String, List<Track>> tracks = spotifyService.getTracksFromPlaylists(playlists);
-    printSpotifyTable(tracks);
+    if (spotifyService.isReady()) {
+      JOptionPane.showMessageDialog(null, "Cargando canciones, por favor espere...", "Cargando Canciones de Spotify", JOptionPane.INFORMATION_MESSAGE);
+      final long start = System.currentTimeMillis();
+      spotifyService.getCurrentUserPlaylistsAsync()
+          .thenApplyAsync(spotifyService::getTracksFromPlaylistsAsync)
+          .thenAcceptAsync(this::printSpotifyTable)
+          .thenRun(() -> {
+            long elapsedMs = System.currentTimeMillis() - start;
+            double seconds = elapsedMs / 1000.0;
+            log.info("Tiempo total loadSpotifyTracks: {} segundos", String.format("%.3f", seconds));
+          })
+          .exceptionally(ex -> {
+            log.error("Error loading Spotify tracks: {}", ex.getMessage());
+            throw new RuntimeException(ex);
+          });
+    } else {
+      JOptionPane.showMessageDialog(null, "No se ha iniciado sesión en Spotify.", "Error", JOptionPane.ERROR_MESSAGE);
+    }
   }
 
   public void playOrPause() {
