@@ -17,6 +17,9 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import javax.swing.JOptionPane;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -262,16 +265,19 @@ public class Controller implements ActionListener, ChangeListener, BasicPlayerLi
     if (spotifyService.isReady()) {
       JOptionPane.showMessageDialog(null, "Cargando canciones, por favor espere...", "Cargando Canciones de Spotify", JOptionPane.INFORMATION_MESSAGE);
       final long start = System.currentTimeMillis();
+      ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
       spotifyService.getCurrentUserPlaylistsAsync()
-          .thenApplyAsync(spotifyService::getTracksFromPlaylistsAsync)
-          .thenAcceptAsync(this::printSpotifyTable)
+          .thenApplyAsync(spotifyService::getTracksFromPlaylistsAsync, executor)
+          .thenAcceptAsync(this::printSpotifyTable, executor)
           .thenRun(() -> {
             long elapsedMs = System.currentTimeMillis() - start;
             double seconds = elapsedMs / 1000.0;
             log.info("Tiempo total loadSpotifyTracks: {} segundos", String.format("%.3f", seconds));
           })
+          .whenComplete((_, _) -> executor.shutdown())
           .exceptionally(ex -> {
             log.error("Error loading Spotify tracks: {}", ex.getMessage());
+            executor.shutdown();
             throw new RuntimeException(ex);
           });
     } else {
